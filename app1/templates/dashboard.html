@@ -172,6 +172,20 @@
         .active-page {
             display: flex !important;
         }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 16px;
+            padding: 0;
+            text-decoration: underline;
+        }
+        .logout-btn:hover {
+            color: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -188,8 +202,22 @@
 
     <!-- 主内容区 -->
     <div class="main-content">
+        <!-- dashboard.html -->
         <div class="welcome-message" id="welcomeMessage">
-            欢迎，游客！请先登录
+            {% if user.is_authenticated %}
+                欢迎，{{ user.username }}！
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; color: #3498db; cursor: pointer; margin-left: 10px; font-size: 16px;">
+                        退出登录
+                    </button>
+                </form>
+            {% else %}
+                欢迎，游客！请先
+                <a href="{% url 'login' %}" style="color: #3498db;">登录</a>
+                或
+                <a href="{% url 'register' %}" style="color: #3498db;">注册</a>
+            {% endif %}
         </div>
 
         <!-- 压力测试页面 -->
@@ -226,8 +254,13 @@
 
         // 页面初始化时设置压力等级
         document.addEventListener('DOMContentLoaded', () => {
+            // 设置压力等级
             pressureSlider.value = userData.latestLevel;
             currentLevel.textContent = userData.latestLevel;
+
+            // 初始化页面显示
+            testPage.style.display = 'flex';
+            adjustPage.style.display = 'none';
         });
 
         // 页面元素
@@ -239,11 +272,6 @@
         const pressureSlider = document.getElementById('pressureSlider');
         const currentLevel = document.getElementById('currentLevel');
         const methodBtns = document.querySelectorAll('.method-btn');
-
-        // 更新欢迎信息
-        if (userData.isAuthenticated) {
-            welcomeMessage.textContent = `欢迎，${userData.username}！`;
-        }
 
         // 导航切换
         navItems.forEach(item => {
@@ -264,6 +292,7 @@
                 }
             });
         });
+
 
         // 压力测试逻辑
         startTestBtn.addEventListener('click', () => {

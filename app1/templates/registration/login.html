@@ -94,19 +94,12 @@
         
         <form method="post">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="id_username">用户名</label>
-                {{ form.username }}
-            </div>
-            <div class="form-group">
-                <label for="id_password">密码</label>
-                {{ form.password }}
-            </div>
+            {{ form.as_p }}
             <button type="submit" class="btn-login">登录</button>
         </form>
         
         <div class="register-link">
-            <p>还没有账号? <a href="#">注册新账号</a></p>
+            <p>还没有账号? <a href="{% url 'register' %}">注册新账号</a></p>
         </div>
     </div>
 </body>

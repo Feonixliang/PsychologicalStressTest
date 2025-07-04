@@ -5,8 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from .models import PressureTest, PressureAdjustment
 import json
-
-
+from django.contrib.auth import login, authenticate
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def dashboard(request):
@@ -21,13 +23,17 @@ def dashboard(request):
     })
 
 
-
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login')
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            messages.success(request, f'账号 {username} 注册成功！')
+            return redirect('dashboard')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})

@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from app1 import views
-
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -25,10 +25,9 @@ urlpatterns = [
     path('save_adjustment/', views.save_adjustment, name='save_adjustment'),
 
 
-
     # 添加认证系统的URL配置
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
-
     path('register/', views.register, name='register'),
 
 ]
