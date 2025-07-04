@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>压力管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 200px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-menu {
+            flex-grow: 1;
+            margin-top: 30px;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item.active {
+            background: #34495e;
+            border-left: 4px solid #3498db;
+        }
+
+        .nav-item:hover {
+            background: #34495e;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            position: relative;
+        }
+
+        .welcome-message {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        /* 压力测试区域样式 */
+        .test-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            display: none;
+        }
+
+        .test-button {
+            width: 30vh;
+            height: 30vh;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #1abc9c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .test-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(52, 152, 219, 0.6);
+        }
+
+        .test-button:active {
+            transform: scale(0.98);
+        }
+
+        /* 压力调节区域样式 */
+        .adjust-container {
+            display: none;
+            height: 100%;
+            padding: 30px;
+        }
+
+        .level-display {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+
+        .slider-container {
+            width: 80%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .slider {
+            width: 100%;
+            height: 15px;
+            -webkit-appearance: none;
+            background: #d3d3d3;
+            outline: none;
+            border-radius: 10px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .adjust-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .method-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .method-btn:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+        }
+
+        /* 活动页面样式 */
+        .active-page {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边导航 -->
+    <div class="sidebar">
+        <div class="user-info">
+            <h3>压力管理系统</h3>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" data-page="test">压力测试</div>
+            <div class="nav-item" data-page="adjust">压力调节</div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="welcome-message" id="welcomeMessage">
+            欢迎，游客！请先登录
+        </div>
+
+        <!-- 压力测试页面 -->
+        <div class="test-container active-page" id="testPage">
+            <button class="test-button" id="startTest">开始测试</button>
+        </div>
+
+        <!-- 压力调节页面 -->
+        <div class="adjust-container" id="adjustPage">
+            <div class="level-display">
+                当前压力等级: <span id="currentLevel">5</span>/10
+            </div>
+
+            <div class="slider-container">
+                <input type="range" min="1" max="10" value="5" class="slider" id="pressureSlider">
+            </div>
+
+            <div class="adjust-buttons">
+                <button class="method-btn" data-method="breathing">呼吸调节</button>
+                <button class="method-btn" data-method="music">音乐疗法</button>
+                <button class="method-btn" data-method="meditation">冥想指导</button>
+                <button class="method-btn" data-method="exercise">运动建议</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 用户信息模拟 (实际应从Django模板获取)
+        const userData = {
+            isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+            username: "{% if user.is_authenticated %}{{ user.username }}{% else %}游客{% endif %}",
+            latestLevel: {% if latest_level %}{{ latest_level }}{% else %}5{% endif %}
+        };
+
+        // 页面初始化时设置压力等级
+        document.addEventListener('DOMContentLoaded', () => {
+            pressureSlider.value = userData.latestLevel;
+            currentLevel.textContent = userData.latestLevel;
+        });
+
+        // 页面元素
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const testPage = document.getElementById('testPage');
+        const adjustPage = document.getElementById('adjustPage');
+        const navItems = document.querySelectorAll('.nav-item');
+        const startTestBtn = document.getElementById('startTest');
+        const pressureSlider = document.getElementById('pressureSlider');
+        const currentLevel = document.getElementById('currentLevel');
+        const methodBtns = document.querySelectorAll('.method-btn');
+
+        // 更新欢迎信息
+        if (userData.isAuthenticated) {
+            welcomeMessage.textContent = `欢迎，${userData.username}！`;
+        }
+
+        // 导航切换
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 更新活动状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                // 显示对应页面
+                const page = item.dataset.page;
+                testPage.style.display = 'none';
+                adjustPage.style.display = 'none';
+
+                if (page === 'test') {
+                    testPage.style.display = 'flex';
+                } else if (page === 'adjust') {
+                    adjustPage.style.display = 'flex';
+                }
+            });
+        });
+
+        // 压力测试逻辑
+        startTestBtn.addEventListener('click', () => {
+            startTestBtn.textContent = "测试中...";
+            startTestBtn.disabled = true;
+
+            // 模拟测试过程
+            setTimeout(() => {
+                // 随机生成压力等级 (1-10)
+                const pressureLevel = Math.floor(Math.random() * 10) + 1;
+
+                // 显示结果
+                alert(`测试完成！您的压力等级为：${pressureLevel}/10`);
+
+                // 发送数据到后端 (AJAX)
+                fetch('/save_test/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        pressure_level: pressureLevel,
+                        duration: 15 // 测试时间15秒
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('测试记录保存成功');
+                    }
+                });
+
+                // 更新UI
+                startTestBtn.textContent = "开始测试";
+                startTestBtn.disabled = false;
+
+                // 更新调节页面的当前等级
+                pressureSlider.value = pressureLevel;
+                currentLevel.textContent = pressureLevel;
+            }, 15000); // 模拟15秒测试
+        });
+
+        // 压力调节逻辑
+        pressureSlider.addEventListener('input', () => {
+            currentLevel.textContent = pressureSlider.value;
+        });
+
+        // 调节方法按钮
+        methodBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+                const beforeLevel = parseInt(currentLevel.textContent);
+
+                // 模拟调节效果 (降低1-3级)
+                const reduction = Math.floor(Math.random() * 3) + 1;
+                let newLevel = beforeLevel - reduction;
+                if (newLevel < 1) newLevel = 1;
+
+                // 更新显示
+                currentLevel.textContent = newLevel;
+                pressureSlider.value = newLevel;
+
+                // 发送数据到后端
+                fetch('/save_adjustment/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        before_level: beforeLevel,
+                        after_level: newLevel,
+                        method: method
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('调节记录保存成功');
+                        alert(`调节成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
+                    }
+                });
+            });
+        });
+
+        // 获取CSRF token的函数
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
