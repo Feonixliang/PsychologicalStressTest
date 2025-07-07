@@ -186,6 +186,99 @@
         .logout-btn:hover {
             color: #2980b9;
         }
+
+        /* 爱好调查模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            animation: modalopen 0.4s;
+        }
+
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-60px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .hobby-survey-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .hobby-item {
+            flex-basis: calc(50% - 15px);
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5eb;
+            transition: all 0.3s;
+        }
+
+        .hobby-item:hover {
+            background: #e3f2fd;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .hobby-item input {
+            margin-right: 10px;
+        }
+
+        .survey-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .survey-submit:hover {
+            background: #2980b9;
+        }
+
     </style>
 </head>
 <body>
@@ -241,6 +334,91 @@
                 <button class="method-btn" data-method="meditation">冥想指导</button>
                 <button class="method-btn" data-method="exercise">运动建议</button>
             </div>
+        </div>
+    </div>
+
+
+    <!-- 在<body>底部添加模态窗口 -->
+    <div id="hobbySurveyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">兴趣爱好调查</h2>
+            <p style="text-align: center; margin-bottom: 20px;">请告诉我们您的兴趣爱好，以便我们为您提供更个性化的服务</p>
+
+            <form id="hobbySurveyForm" class="hobby-survey-form">
+                {% csrf_token %}
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="reading">
+                        阅读
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="sports">
+                        运动
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="music">
+                        音乐
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="travel">
+                        旅行
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="gaming">
+                        游戏
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="art">
+                        艺术
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="cooking">
+                        烹饪
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="photography">
+                        摄影
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="dancing">
+                        舞蹈
+                    </label>
+                </div>
+
+                <div class="hobby-item">
+                    <label>
+                        <input type="checkbox" name="hobbies" value="gardening">
+                        园艺
+                    </label>
+                </div>
+
+                <button type="submit" class="survey-submit">提交兴趣爱好</button>
+            </form>
         </div>
     </div>
 
@@ -394,6 +572,86 @@
             }
             return cookieValue;
         }
+
+
+        // 当页面加载完成时
+        document.addEventListener('DOMContentLoaded', () => {
+            // 检查是否显示爱好调查
+            const showHobbySurvey = {% if show_hobby_survey %}true{% else %}false{% endif %};
+
+            if (showHobbySurvey) {
+                const modal = document.getElementById('hobbySurveyModal');
+                modal.style.display = 'block';
+
+                // 关闭按钮事件
+                const closeBtn = document.querySelector('.close');
+                closeBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+
+                // 表单提交事件
+                const surveyForm = document.getElementById('hobbySurveyForm');
+                surveyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // 获取选中的爱好
+                    const selectedHobbies = [];
+                    document.querySelectorAll('input[name="hobbies"]:checked').forEach(checkbox => {
+                        selectedHobbies.push(checkbox.value);
+                    });
+
+                    // 添加CSRF令牌
+                    const formData = new FormData();
+                    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+                    selectedHobbies.forEach(hobby => {
+                        formData.append('hobbies[]', hobby);  // 添加 [] 表示数组
+                    });
+
+                    // 发送AJAX请求 - 修改后的部分
+                    fetch('/save_hobby_survey/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'), // 添加CSRF令牌头
+                            'Accept': 'application/json' // 明确要求JSON响应
+                        },
+                        body: formData
+                    })
+
+                    .then(response => {
+                        // 首先检查响应状态
+                        if (response.status === 403) {
+                            throw new Error('CSRF验证失败');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            modal.style.display = 'none';
+                            alert('兴趣爱好提交成功！感谢您的参与。');
+                        } else {
+                            alert('提交失败：' + (data.error || '请稍后再试'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('提交失败：' + error.message);
+                    });
+                });
+            }
+        });
+
+        // 添加全局点击关闭模态窗口的功能
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('hobbySurveyModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
     </script>
+
+
+
 </body>
 </html>

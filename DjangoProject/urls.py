@@ -23,7 +23,7 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('save_test/', views.save_test, name='save_test'),
     path('save_adjustment/', views.save_adjustment, name='save_adjustment'),
-
+    path('save_hobby_survey/', views.save_hobby_survey, name='save_hobby_survey'),
 
     # 添加认证系统的URL配置
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
