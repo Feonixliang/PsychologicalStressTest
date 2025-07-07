@@ -291,6 +291,7 @@
             <div class="nav-item active" data-page="test">压力测试</div>
             <div class="nav-item" data-page="adjust">压力调节</div>
         </div>
+        <div class="nav-item" data-page="profile">个人资料</div>
     </div>
 
     <!-- 主内容区 -->
@@ -432,6 +433,15 @@
 
         // 页面初始化时设置压力等级
         document.addEventListener('DOMContentLoaded', () => {
+            // 根据当前页面设置活动状态
+            const currentPage = window.location.pathname;
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (currentPage.includes('edit_profile') && item.dataset.page === 'profile') {
+                    item.classList.add('active');
+                }
+            });
+
             // 设置压力等级
             pressureSlider.value = userData.latestLevel;
             currentLevel.textContent = userData.latestLevel;
@@ -467,6 +477,9 @@
                     testPage.style.display = 'flex';
                 } else if (page === 'adjust') {
                     adjustPage.style.display = 'flex';
+                } else if (page === 'profile') {
+                    // 跳转到个人资料编辑页面
+                    window.location.href = "{% url 'edit_profile' %}";
                 }
             });
         });

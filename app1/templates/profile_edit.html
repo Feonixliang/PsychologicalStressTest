@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑个人资料</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .profile-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .profile-header {
+            background: linear-gradient(to right, #3498db, #1abc9c);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .profile-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .profile-header::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: white;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .profile-form {
+            padding: 40px 30px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label i {
+            margin-right: 10px;
+            width: 20px;
+            color: #3498db;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 20px 14px 45px;
+            border: 1px solid #e1e5eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f9fbfd;
+        }
+
+        .input-field:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+            background-color: white;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-custom {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #bdc3c7;
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-custom {
+            border-color: #3498db;
+            background-color: #3498db;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-custom::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-save {
+            background: linear-gradient(to right, #3498db, #1abc9c);
+            color: white;
+            flex: 1;
+            margin-right: 15px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f5f7fa;
+            color: #7f8c8d;
+            border: 1px solid #e1e5eb;
+        }
+
+        .btn-cancel:hover {
+            background: #eef2f7;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: #ecf0f1;
+            margin: -70px auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .user-avatar i {
+            font-size: 40px;
+            color: #bdc3c7;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .profile-container {
+                border-radius: 15px;
+            }
+
+            .profile-header {
+                padding: 25px 20px;
+            }
+
+            .profile-form {
+                padding: 30px 20px 25px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .btn-save {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>编辑个人资料</h1>
+            <p>更新您的个人信息和设置</p>
+        </div>
+
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+            <div class="avatar-upload">
+                <i class="fas fa-camera"></i>
+            </div>
+        </div>
+
+        <form class="profile-form" method="post">
+            {% csrf_token %}
+
+            <!-- 显示表单错误 -->
+            {% if form.errors %}
+            <div class="form-errors" style="color: red; margin-bottom: 20px;">
+                <strong>请修正以下错误：</strong>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label for="id_username"><i class="fas fa-user-circle"></i> 用户名</label>
+                <div class="input-container">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="id_username" class="input-field" value="{{ user.username }}" disabled>
+                </div>
+            </div>
+
+             <!-- 邮箱 -->
+            <div class="form-group">
+                <label for="id_email"><i class="fas fa-envelope"></i> 电子邮箱</label>
+                <div class="input-container">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="id_email" class="input-field" name="email" value="{{ user.email }}" required>
+                </div>
+            </div>
+
+            <!-- 添加错误提示 -->
+            {% if form.email.errors %}
+                <div class="error" style="color: red; margin-top: 5px;">
+                    {% for error in form.email.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- 出生日期 -->
+            <div class="form-group">
+                <label for="id_birth_date"><i class="fas fa-birthday-cake"></i> 出生日期</label>
+                <div class="input-container">
+                    <i class="fas fa-calendar input-icon"></i>
+                    {{ form.birth_date }}
+                </div>
+            </div>
+
+            <!-- 性别 -->
+            <div class="form-group">
+                <label><i class="fas fa-venus-mars"></i> 性别</label>
+                <div class="radio-group">
+                    {% for choice in form.gender %}
+                    <label class="radio-option">
+                        {{ choice.tag }}
+                        <span class="radio-custom"></span>
+                        <span>{{ choice.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 电话 -->
+            <div class="form-group">
+                <label for="id_phone"><i class="fas fa-phone"></i> 电话号码</label>
+                <div class="input-container">
+                    <i class="fas fa-mobile-alt input-icon"></i>
+                    {{ form.phone }}
+                </div>
+            </div>
+
+            <!-- 个人简介 -->
+            <div class="form-group">
+                <label for="id_bio"><i class="fas fa-info-circle"></i> 个人简介</label>
+                <div class="input-container">
+                    <i class="fas fa-pen input-icon"></i>
+                    <textarea id="id_bio" class="input-field" rows="3" placeholder="简单介绍一下自己..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> 保存更改
+                </button>
+                <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // 为表单元素添加样式类
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为出生日期字段添加样式
+            const birthDateInput = document.getElementById('id_birth_date');
+            if (birthDateInput) {
+                birthDateInput.classList.add('input-field');
+                birthDateInput.type = 'date';
+
+                // 添加日历图标
+                const birthDateContainer = birthDateInput.parentElement;
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-calendar input-icon';
+                birthDateContainer.insertBefore(icon, birthDateInput);
+            }
+
+            // 为电话字段添加样式
+            const phoneInput = document.getElementById('id_phone');
+            if (phoneInput) {
+                phoneInput.classList.add('input-field');
+                phoneInput.placeholder = '请输入您的电话号码';
+
+                // 添加电话图标
+                const phoneContainer = phoneInput.parentElement;
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-mobile-alt input-icon';
+                phoneContainer.insertBefore(icon, phoneInput);
+            }
+
+            // 模拟头像上传功能
+            const avatarUpload = document.querySelector('.avatar-upload');
+            avatarUpload.addEventListener('click', function() {
+                alert('头像上传功能（在实际应用中会打开文件选择器）');
+            });
+        });
+    </script>
+</body>
+</html>

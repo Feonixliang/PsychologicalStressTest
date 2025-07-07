@@ -11,6 +11,8 @@ from django.utils.decorators import method_decorator
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .forms import UserProfileForm
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,3 +122,29 @@ def save_adjustment(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+@login_required
+def edit_profile(request):
+    try:
+        profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        # 如果资料不存在则创建
+        profile = UserProfile.objects.create(user=request.user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '个人资料已更新！')
+            return redirect('dashboard')
+        else:
+            # 添加表单错误处理
+            messages.error(request, '请修正以下错误')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    return render(request, 'profile_edit.html', {
+        'form': form,
+        'user': request.user  # 确保 user 对象传递给模板
+    })

@@ -17,6 +17,7 @@ class UserProfile(models.Model):
         ('O', '其他')
     ], blank=True)
     phone = models.CharField(max_length=20, blank=True)
+    bio = models.TextField('个人简介', max_length=500, blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"
