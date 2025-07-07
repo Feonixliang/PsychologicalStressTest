@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>压力管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
+        /* 所有之前的样式保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -18,7 +21,52 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
 
-        /* 侧边栏样式 */
+        /* 用户菜单容器 */
+        .user-menu-container {
+            position: relative;
+        }
+
+        /* 用户菜单 */
+        .user-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 200px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .user-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-menu a {
+            display: block;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .user-menu a:hover {
+            background: #f0f7ff;
+        }
+
+        .user-menu a i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 所有其他样式保持不变 */
         .sidebar {
             width: 200px;
             background: #2c3e50;
@@ -55,7 +103,6 @@
             background: #34495e;
         }
 
-        /* 主内容区样式 */
         .main-content {
             flex-grow: 1;
             padding: 30px;
@@ -70,7 +117,6 @@
             color: #2c3e50;
         }
 
-        /* 压力测试区域样式 */
         .test-container {
             display: flex;
             flex-direction: column;
@@ -106,7 +152,6 @@
             transform: scale(0.98);
         }
 
-        /* 压力调节区域样式 */
         .adjust-container {
             display: none;
             height: 100%;
@@ -168,7 +213,6 @@
             transform: translateY(-3px);
         }
 
-        /* 活动页面样式 */
         .active-page {
             display: flex !important;
         }
@@ -187,7 +231,6 @@
             color: #2980b9;
         }
 
-        /* 爱好调查模态窗口样式 */
         .modal {
             display: none;
             position: fixed;
@@ -279,392 +322,702 @@
             background: #2980b9;
         }
 
+        .test-button {
+            position: relative;
+            width: 30vh;
+            height: 30vh;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #1abc9c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .test-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(52, 152, 219, 0.6);
+        }
+
+        .test-button:active {
+            transform: scale(0.98);
+        }
+
+        .level-display {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+
+        .slider-container {
+            width: 80%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .slider {
+            width: 100%;
+            height: 15px;
+            -webkit-appearance: none;
+            background: #d3d3d3;
+            outline: none;
+            border-radius: 10px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .adjust-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .method-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .method-btn:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+        }
+
+        .recommendation-card {
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(245, 247, 250, 0.7);
+            border: 1px solid rgba(225, 229, 235, 0.5);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(52, 152, 219, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #3498db;
+            margin-right: 15px;
+        }
+
+        .star-rating .fa-star {
+            transition: all 0.2s ease;
+        }
+
+        .star-rating .fa-star:hover,
+        .star-rating .fa-star:hover ~ .fa-star {
+            transform: scale(1.2);
+            color: #FFD700;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e7ff;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #1abc9c);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .detection-animation {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 4px solid rgba(52, 152, 219, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .circle-1 { width: 100%; height: 100%; animation-delay: 0s; }
+        .circle-2 { width: 80%; height: 80%; top: 10%; left: 10%; animation-delay: 0.2s; }
+        .circle-3 { width: 60%; height: 60%; top: 20%; left: 20%; animation-delay: 0.4s; }
+        .circle-4 { width: 40%; height: 40%; top: 30%; left: 30%; animation-delay: 0.6s; }
+
+        .brain-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #3498db;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .result-good {
+            background: rgba(26, 188, 156, 0.2);
+            color: #1abc9c;
+        }
+
+        .result-medium {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .result-bad {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #3498db, #1abc9c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-change {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .change-positive {
+            color: #1abc9c;
+        }
+
+        .change-negative {
+            color: #e74c3c;
+        }
+
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
     </style>
 </head>
-<body>
-    <!-- 侧边导航 -->
-    <div class="sidebar">
-        <div class="user-info">
-            <h3>压力管理系统</h3>
-        </div>
-        <div class="nav-menu">
-            <div class="nav-item active" data-page="test">压力测试</div>
-            <div class="nav-item" data-page="adjust">压力调节</div>
-        </div>
-        <div class="nav-item" data-page="profile">个人资料</div>
-    </div>
+<body class="bg-gradient-to-br from-blue-50 to-cyan-100 min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- 顶部导航栏 -->
+        <nav class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg shadow-sm py-4 px-6">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa fa-brain text-2xl text-blue-600"></i>
+                    <span class="text-xl font-bold text-blue-800">压力管理系统</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="user-menu-container relative">
+                        <button id="user-menu-button" class="flex items-center space-x-2 text-gray-700 hover:text-blue-600">
+                            <i class="fa fa-user-circle text-xl"></i>
+                            <span>{{ user.username }}</span>
+                            <i class="fa fa-caret-down"></i>
+                        </button>
 
-    <!-- 主内容区 -->
-    <div class="main-content">
-        <!-- dashboard.html -->
-        <div class="welcome-message" id="welcomeMessage">
-            {% if user.is_authenticated %}
-                欢迎，{{ user.username }}！
-                <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" style="background: none; border: none; color: #3498db; cursor: pointer; margin-left: 10px; font-size: 16px;">
-                        退出登录
-                    </button>
-                </form>
-            {% else %}
-                欢迎，游客！请先
-                <a href="{% url 'login' %}" style="color: #3498db;">登录</a>
-                或
-                <a href="{% url 'register' %}" style="color: #3498db;">注册</a>
-            {% endif %}
-        </div>
-
-        <!-- 压力测试页面 -->
-        <div class="test-container active-page" id="testPage">
-            <button class="test-button" id="startTest">开始测试</button>
-        </div>
-
-        <!-- 压力调节页面 -->
-        <div class="adjust-container" id="adjustPage">
-            <div class="level-display">
-                当前压力等级: <span id="currentLevel">5</span>/10
+                        <div id="user-menu" class="user-menu">
+                            <a href="{% url 'edit_profile' %}">
+                                <i class="fa fa-user"></i>个人资料
+                            </a>
+                            <form action="{% url 'logout' %}" method="post" style="display: inline; width: 100%;">
+                                {% csrf_token %}
+                                <button type="submit" style="
+                                    background: none;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    color: #333;
+                                    text-decoration: none;
+                                    cursor: pointer;
+                                    width: 100%;
+                                    text-align: left;
+                                    font-family: inherit;
+                                    font-size: inherit;
+                                    display: flex;
+                                    align-items: center;
+                                ">
+                                    <i class="fa fa-sign-out" style="margin-right: 8px; width: 20px; text-align: center;"></i>
+                                    退出登录
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </nav>
 
-            <div class="slider-container">
-                <input type="range" min="1" max="10" value="5" class="slider" id="pressureSlider">
-            </div>
+        <!-- 主内容区 -->
+        <div class="flex-1">
+            <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <!-- 欢迎信息 -->
+                <div class="mb-8 text-center">
+                    <h1 class="text-3xl font-bold text-gray-800">欢迎回来，{{ user.username }}！</h1>
+                    <p class="text-gray-600 mt-2">您的压力健康是我们的首要任务</p>
+                </div>
 
-            <div class="adjust-buttons">
-                <button class="method-btn" data-method="breathing">呼吸调节</button>
-                <button class="method-btn" data-method="music">音乐疗法</button>
-                <button class="method-btn" data-method="meditation">冥想指导</button>
-                <button class="method-btn" data-method="exercise">运动建议</button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 左侧面板 - 压力测试 -->
+                    <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-gray-800">压力测试</h2>
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fa fa-heartbeat text-blue-600"></i>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-4">
+                            <button id="startTest" class="test-button mx-auto">
+                                开始测试
+                                <span class="absolute -bottom-8 text-sm text-gray-600">请保持放松状态</span>
+                            </button>
+                        </div>
+
+                        <div class="mt-8">
+                            <h3 class="text-lg font-medium text-gray-700 mb-4">最近测试记录</h3>
+                            <div class="space-y-3">
+                                <!-- 测试记录会动态加载 -->
+                                <div class="text-center py-4 text-gray-500">
+                                    暂无测试记录
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 中间面板 - 压力调节 -->
+                    <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-gray-800">压力调节</h2>
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                <i class="fa fa-spa text-green-600"></i>
+                            </div>
+                        </div>
+
+                        <div class="level-display">
+                            当前压力等级: <span id="currentLevel">5</span>/10
+                        </div>
+
+                        <div class="slider-container">
+                            <input type="range" min="1" max="10" value="5" class="slider" id="pressureSlider">
+                        </div>
+
+                        <div class="adjust-buttons">
+                            <button class="method-btn" data-method="breathing">呼吸调节</button>
+                            <button class="method-btn" data-method="music">音乐疗法</button>
+                            <button class="method-btn" data-method="meditation">冥想指导</button>
+                        </div>
+
+                        <div class="mt-8">
+                            <h3 class="text-lg font-medium text-gray-700 mb-4">推荐调节方法</h3>
+                            <div class="recommendation-grid">
+                                <div class="recommendation-card">
+                                    <div class="flex items-start">
+                                        <div class="recommendation-icon">
+                                            <i class="fa fa-play-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800 mb-1">放松视频</h4>
+                                            <p class="text-sm text-gray-600">5分钟自然风光视频</p>
+                                            <div class="mt-2">
+                                                <div class="flex justify-between text-sm">
+                                                    <span>匹配度</span>
+                                                    <span>92%</span>
+                                                </div>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" style="width: 92%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="recommendation-card">
+                                    <div class="flex items-start">
+                                        <div class="recommendation-icon">
+                                            <i class="fa fa-music"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800 mb-1">舒缓音乐</h4>
+                                            <p class="text-sm text-gray-600">轻音乐精选合集</p>
+                                            <div class="mt-2">
+                                                <div class="flex justify-between text-sm">
+                                                    <span>匹配度</span>
+                                                    <span>85%</span>
+                                                </div>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" style="width: 85%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧面板 - 检测结果 -->
+                    <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-gray-800">检测结果</h2>
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                <i class="fa fa-chart-line text-purple-600"></i>
+                            </div>
+                        </div>
+
+                        <div id="detectionSection">
+                            <div class="detection-animation">
+                                <div class="circle circle-1"></div>
+                                <div class="circle circle-2"></div>
+                                <div class="circle circle-3"></div>
+                                <div class="circle circle-4"></div>
+                                <div class="brain-icon">
+                                    <i class="fa fa-brain"></i>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">正在检测压力水平</h3>
+                                <p class="text-gray-600 mb-6">请保持放松状态，不要移动</p>
+
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                    <div id="detectionProgress" class="h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-teal-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="resultSection" class="hidden">
+                            <div class="result-card">
+                                <div class="text-lg font-medium text-gray-700">压力检测结果</div>
+                                <div class="result-value" id="resultValue">6.2</div>
+                                <div class="text-gray-600">压力等级</div>
+
+                                <div class="mt-4">
+                                    <span class="result-badge result-medium">中等压力</span>
+                                </div>
+
+                                <div class="mt-6">
+                                    <div class="flex justify-between text-sm text-gray-600">
+                                        <span>调节前: 7.8</span>
+                                        <span class="result-change change-positive">↓ 1.6</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
+                                        <div class="h-2.5 rounded-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400" style="width: 62%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-8">
+                                    <h4 class="font-medium text-gray-800 mb-3">调节满意度评分</h4>
+                                    <div class="star-rating text-2xl mb-4">
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <i class="fa fa-star text-yellow-400"></i>
+                                        <i class="fa fa-star text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史记录图表 -->
+                <div class="mt-10 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">压力历史记录</h2>
+                    <div class="h-64">
+                        <!-- 这里可以放置压力历史图表 -->
+                        <div class="bg-gray-100 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center text-gray-400">
+                            压力历史图表区域
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-
-    <!-- 在<body>底部添加模态窗口 -->
-    <div id="hobbySurveyModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 class="modal-title">兴趣爱好调查</h2>
-            <p style="text-align: center; margin-bottom: 20px;">请告诉我们您的兴趣爱好，以便我们为您提供更个性化的服务</p>
-
-            <form id="hobbySurveyForm" class="hobby-survey-form">
-                {% csrf_token %}
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="reading">
-                        阅读
-                    </label>
+        <!-- 页脚 -->
+        <footer class="py-6 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center text-gray-600">
+                    © 2023 压力管理系统 | 关注您的心理健康
                 </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="sports">
-                        运动
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="music">
-                        音乐
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="travel">
-                        旅行
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="gaming">
-                        游戏
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="art">
-                        艺术
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="cooking">
-                        烹饪
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="photography">
-                        摄影
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="dancing">
-                        舞蹈
-                    </label>
-                </div>
-
-                <div class="hobby-item">
-                    <label>
-                        <input type="checkbox" name="hobbies" value="gardening">
-                        园艺
-                    </label>
-                </div>
-
-                <button type="submit" class="survey-submit">提交兴趣爱好</button>
-            </form>
-        </div>
+            </div>
+        </footer>
     </div>
 
     <script>
-        // 用户信息模拟 (实际应从Django模板获取)
-        const userData = {
-            isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
-            username: "{% if user.is_authenticated %}{{ user.username }}{% else %}游客{% endif %}",
-            latestLevel: {% if latest_level %}{{ latest_level }}{% else %}5{% endif %}
-        };
+    // 用户信息模拟
+    const userData = {
+        isAuthenticated: true,
+        username: "{{ user.username }}",
+        latestLevel: 5
+    };
 
-        // 页面初始化时设置压力等级
-        document.addEventListener('DOMContentLoaded', () => {
-            // 根据当前页面设置活动状态
-            const currentPage = window.location.pathname;
-            navItems.forEach(item => {
-                item.classList.remove('active');
-                if (currentPage.includes('edit_profile') && item.dataset.page === 'profile') {
-                    item.classList.add('active');
-                }
-            });
-
-            // 设置压力等级
-            pressureSlider.value = userData.latestLevel;
-            currentLevel.textContent = userData.latestLevel;
-
-            // 初始化页面显示
-            testPage.style.display = 'flex';
-            adjustPage.style.display = 'none';
-        });
-
-        // 页面元素
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const testPage = document.getElementById('testPage');
-        const adjustPage = document.getElementById('adjustPage');
-        const navItems = document.querySelectorAll('.nav-item');
-        const startTestBtn = document.getElementById('startTest');
+    // 页面初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        // 设置压力等级
         const pressureSlider = document.getElementById('pressureSlider');
         const currentLevel = document.getElementById('currentLevel');
-        const methodBtns = document.querySelectorAll('.method-btn');
+        pressureSlider.value = userData.latestLevel;
+        currentLevel.textContent = userData.latestLevel;
 
-        // 导航切换
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                // 更新活动状态
-                navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
+        // 初始化结果面板
+        document.getElementById('resultSection').classList.add('hidden');
 
-                // 显示对应页面
-                const page = item.dataset.page;
-                testPage.style.display = 'none';
-                adjustPage.style.display = 'none';
+        // 初始化检测动画
+        initDetectionAnimation();
 
-                if (page === 'test') {
-                    testPage.style.display = 'flex';
-                } else if (page === 'adjust') {
-                    adjustPage.style.display = 'flex';
-                } else if (page === 'profile') {
-                    // 跳转到个人资料编辑页面
-                    window.location.href = "{% url 'edit_profile' %}";
-                }
-            });
+        // 初始化用户菜单
+        initUserMenu();
+    });
+
+    // 初始化检测动画
+    function initDetectionAnimation() {
+        const circles = document.querySelectorAll('.circle');
+        circles.forEach((circle, index) => {
+            circle.style.animationDelay = `${index * 0.5}s`;
+        });
+    }
+
+    // 初始化用户菜单
+    function initUserMenu() {
+        const menuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+        const menuContainer = document.querySelector('.user-menu-container');
+
+        // 菜单显示状态
+        let isMenuOpen = false;
+
+        // 点击按钮切换菜单
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMenuOpen = !isMenuOpen;
+            userMenu.classList.toggle('active', isMenuOpen);
         });
 
-
-        // 压力测试逻辑
-        startTestBtn.addEventListener('click', () => {
-            startTestBtn.textContent = "测试中...";
-            startTestBtn.disabled = true;
-
-            // 模拟测试过程
-            setTimeout(() => {
-                // 随机生成压力等级 (1-10)
-                const pressureLevel = Math.floor(Math.random() * 10) + 1;
-
-                // 显示结果
-                alert(`测试完成！您的压力等级为：${pressureLevel}/10`);
-
-                // 发送数据到后端 (AJAX)
-                fetch('/save_test/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        pressure_level: pressureLevel,
-                        duration: 15 // 测试时间15秒
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('测试记录保存成功');
-                    }
-                });
-
-                // 更新UI
-                startTestBtn.textContent = "开始测试";
-                startTestBtn.disabled = false;
-
-                // 更新调节页面的当前等级
-                pressureSlider.value = pressureLevel;
-                currentLevel.textContent = pressureLevel;
-            }, 15000); // 模拟15秒测试
+        // 点击菜单项
+        userMenu.addEventListener('click', (e) => {
+            // 阻止事件冒泡，避免触发文档点击事件
+            e.stopPropagation();
         });
 
-        // 压力调节逻辑
-        pressureSlider.addEventListener('input', () => {
-            currentLevel.textContent = pressureSlider.value;
-        });
-
-        // 调节方法按钮
-        methodBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const method = btn.dataset.method;
-                const beforeLevel = parseInt(currentLevel.textContent);
-
-                // 模拟调节效果 (降低1-3级)
-                const reduction = Math.floor(Math.random() * 3) + 1;
-                let newLevel = beforeLevel - reduction;
-                if (newLevel < 1) newLevel = 1;
-
-                // 更新显示
-                currentLevel.textContent = newLevel;
-                pressureSlider.value = newLevel;
-
-                // 发送数据到后端
-                fetch('/save_adjustment/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        before_level: beforeLevel,
-                        after_level: newLevel,
-                        method: method
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('调节记录保存成功');
-                        alert(`调节成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
-                    }
-                });
-            });
-        });
-
-        // 获取CSRF token的函数
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-
-        // 当页面加载完成时
-        document.addEventListener('DOMContentLoaded', () => {
-            // 检查是否显示爱好调查
-            const showHobbySurvey = {% if show_hobby_survey %}true{% else %}false{% endif %};
-
-            if (showHobbySurvey) {
-                const modal = document.getElementById('hobbySurveyModal');
-                modal.style.display = 'block';
-
-                // 关闭按钮事件
-                const closeBtn = document.querySelector('.close');
-                closeBtn.addEventListener('click', () => {
-                    modal.style.display = 'none';
-                });
-
-                // 表单提交事件
-                const surveyForm = document.getElementById('hobbySurveyForm');
-                surveyForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    // 获取选中的爱好
-                    const selectedHobbies = [];
-                    document.querySelectorAll('input[name="hobbies"]:checked').forEach(checkbox => {
-                        selectedHobbies.push(checkbox.value);
-                    });
-
-                    // 添加CSRF令牌
-                    const formData = new FormData();
-                    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-
-                    selectedHobbies.forEach(hobby => {
-                        formData.append('hobbies[]', hobby);  // 添加 [] 表示数组
-                    });
-
-                    // 发送AJAX请求 - 修改后的部分
-                    fetch('/save_hobby_survey/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'), // 添加CSRF令牌头
-                            'Accept': 'application/json' // 明确要求JSON响应
-                        },
-                        body: formData
-                    })
-
-                    .then(response => {
-                        // 首先检查响应状态
-                        if (response.status === 403) {
-                            throw new Error('CSRF验证失败');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            modal.style.display = 'none';
-                            alert('兴趣爱好提交成功！感谢您的参与。');
-                        } else {
-                            alert('提交失败：' + (data.error || '请稍后再试'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('提交失败：' + error.message);
-                    });
-                });
+        // 点击文档其他区域关闭菜单
+        document.addEventListener('click', (e) => {
+            if (isMenuOpen && !menuContainer.contains(e.target)) {
+                isMenuOpen = false;
+                userMenu.classList.remove('active');
             }
         });
 
-        // 添加全局点击关闭模态窗口的功能
-        window.addEventListener('click', (event) => {
+        // 鼠标悬停在菜单容器上时保持菜单打开
+        menuContainer.addEventListener('mouseenter', () => {
+            isMenuOpen = true;
+            userMenu.classList.add('active');
+        });
+
+        // 鼠标离开菜单容器时关闭菜单
+        menuContainer.addEventListener('mouseleave', () => {
+            isMenuOpen = false;
+            userMenu.classList.remove('active');
+        });
+    }
+
+    // 压力测试逻辑
+    const startTestBtn = document.getElementById('startTest');
+    const detectionProgress = document.getElementById('detectionProgress');
+    const detectionSection = document.getElementById('detectionSection');
+    const resultSection = document.getElementById('resultSection');
+    const resultValue = document.getElementById('resultValue');
+
+    startTestBtn.addEventListener('click', () => {
+        // 更新按钮状态
+        startTestBtn.textContent = "测试中...";
+        startTestBtn.disabled = true;
+
+        // 显示检测动画
+        detectionSection.classList.remove('hidden');
+        resultSection.classList.add('hidden');
+
+        // 重置进度条
+        detectionProgress.style.width = '0%';
+
+        // 模拟测试过程
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 1;
+            detectionProgress.style.width = `${progress}%`;
+
+            if (progress >= 100) {
+                clearInterval(interval);
+
+                // 完成测试
+                setTimeout(() => {
+                    // 随机生成压力等级 (1-10)
+                    const pressureLevel = Math.floor(Math.random() * 10) + 1;
+
+                    // 显示结果
+                    resultValue.textContent = pressureLevel;
+
+                    // 更新UI
+                    startTestBtn.textContent = "开始测试";
+                    startTestBtn.disabled = false;
+
+                    // 更新调节页面的当前等级
+                    const pressureSlider = document.getElementById('pressureSlider');
+                    const currentLevel = document.getElementById('currentLevel');
+                    pressureSlider.value = pressureLevel;
+                    currentLevel.textContent = pressureLevel;
+
+                    // 隐藏检测动画，显示结果
+                    detectionSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+
+                    // 发送数据到后端 (模拟)
+                    console.log('压力测试完成，等级:', pressureLevel);
+                }, 500);
+            }
+        }, 30); // 模拟3秒测试
+    });
+
+    // 压力调节逻辑
+    const pressureSlider = document.getElementById('pressureSlider');
+    const currentLevel = document.getElementById('currentLevel');
+    const methodBtns = document.querySelectorAll('.method-btn');
+
+    pressureSlider.addEventListener('input', () => {
+        currentLevel.textContent = pressureSlider.value;
+    });
+
+    // 调节方法按钮
+    methodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const method = btn.dataset.method;
+            const beforeLevel = parseInt(currentLevel.textContent);
+
+            // 模拟调节效果 (降低1-3级)
+            const reduction = Math.floor(Math.random() * 3) + 1;
+            let newLevel = beforeLevel - reduction;
+            if (newLevel < 1) newLevel = 1;
+
+            // 更新显示
+            currentLevel.textContent = newLevel;
+            pressureSlider.value = newLevel;
+
+            // 显示通知
+            showNotification(`使用${getMethodName(method)}成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
+        });
+    });
+
+    // 获取方法名称
+    function getMethodName(method) {
+        const methods = {
+            'breathing': '呼吸调节',
+            'music': '音乐疗法',
+            'meditation': '冥想指导'
+        };
+        return methods[method] || method;
+    }
+
+    // 显示通知
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // 爱好调查模态窗口处理
+    document.addEventListener('DOMContentLoaded', () => {
+        // 检查是否显示爱好调查 (模拟)
+        const showHobbySurvey = false;
+
+        if (showHobbySurvey) {
             const modal = document.getElementById('hobbySurveyModal');
-            if (event.target === modal) {
+            modal.style.display = 'block';
+
+            // 关闭按钮事件
+            const closeBtn = document.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
-            }
-        });
+            });
 
-    </script>
+            // 表单提交事件
+            const surveyForm = document.getElementById('hobbySurveyForm');
+            surveyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('兴趣爱好提交成功！');
+                modal.style.display = 'none';
+            });
+        }
+    });
 
-
+    // 添加全局点击关闭模态窗口的功能
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('hobbySurveyModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+</script>
 
 </body>
 </html>
