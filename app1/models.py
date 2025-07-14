@@ -84,6 +84,8 @@ class PressureAdjustment(models.Model):
         ('meditation', '冥想'),
         ('exercise', '运动'),
     ])
+    video_url = models.URLField('视频链接', blank=True, null=True)
+    video_title = models.CharField('视频标题', max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}: {self.before_level} → {self.after_level}"

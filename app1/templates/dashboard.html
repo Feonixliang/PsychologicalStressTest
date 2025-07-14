@@ -555,6 +555,39 @@
             margin-top: 30px;
         }
 
+        /* 视频模态框样式 */
+        #videoModal {
+            transition: opacity 0.3s ease;
+        }
+
+        #videoPlayer {
+            max-height: 70vh;
+            background: #000;
+        }
+
+
+        .result-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .result-good {
+            background: rgba(26, 188, 156, 0.2);
+            color: #1abc9c;
+        }
+
+        .result-medium {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .result-bad {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-cyan-100 min-h-screen">
@@ -623,11 +656,27 @@
                             </div>
                         </div>
 
+                        <!-- 在压力测试面板内修改测试按钮部分 -->
                         <div class="text-center py-4">
                             <button id="startTest" class="test-button mx-auto">
                                 开始测试
                                 <span class="absolute -bottom-8 text-sm text-gray-600">请保持放松状态</span>
                             </button>
+
+                            <!-- 添加文件上传区域 -->
+                            <div id="fileUploadSection" class="mt-6 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">上传生理信号数据(.mat)</label>
+                                <div class="flex items-center justify-center">
+                                    <label for="matFile" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                                        <i class="fa fa-upload mr-2"></i>选择文件
+                                    </label>
+                                    <input type="file" id="matFile" accept=".mat" class="hidden">
+                                    <span id="fileName" class="ml-3 text-sm text-gray-600">未选择文件</span>
+                                </div>
+                                <button id="uploadBtn" class="mt-4 w-full max-w-xs mx-auto bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    <i class="fa fa-cloud-upload mr-2"></i>上传并分析
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mt-8">
@@ -684,6 +733,12 @@
                                                     <div class="progress-fill" style="width: 92%"></div>
                                                 </div>
                                             </div>
+                                            <!-- 添加播放按钮 -->
+                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
+                                                    data-video-url="https://example.com/video1.mp4"
+                                                    data-video-title="自然风光放松视频">
+                                                <i class="fa fa-play mr-1"></i>播放视频
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -705,6 +760,12 @@
                                                     <div class="progress-fill" style="width: 85%"></div>
                                                 </div>
                                             </div>
+                                            <!-- 添加播放按钮 -->
+                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
+                                                    data-video-url="https://example.com/music1.mp3"
+                                                    data-video-title="轻音乐精选">
+                                                <i class="fa fa-play mr-1"></i>播放音乐
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -746,30 +807,61 @@
                             <div class="result-card">
                                 <div class="text-lg font-medium text-gray-700">压力检测结果</div>
                                 <div class="result-value" id="resultValue">6.2</div>
-                                <div class="text-gray-600">压力等级</div>
+                                <div class="text-gray-600">压力等级: <span id="pressureLevelLabel">低压力</span></div>
 
                                 <div class="mt-4">
-                                    <span class="result-badge result-medium">中等压力</span>
+                                    <span class="result-badge" id="resultBadge">低压力</span>
                                 </div>
 
                                 <div class="mt-6">
-                                    <div class="flex justify-between text-sm text-gray-600">
-                                        <span>调节前: 7.8</span>
-                                        <span class="result-change change-positive">↓ 1.6</span>
+                                    <div class="text-sm text-gray-700 mb-2">
+                                        文件名: <span id="resultFileName" class="font-medium">level1.mat</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
-                                        <div class="h-2.5 rounded-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400" style="width: 62%"></div>
+                                    <div class="text-sm text-gray-700 mb-2">
+                                        置信度: <span id="resultConfidence" class="font-medium">0.8459</span>
                                     </div>
-                                </div>
 
-                                <div class="mt-8">
-                                    <h4 class="font-medium text-gray-800 mb-3">调节满意度评分</h4>
-                                    <div class="star-rating text-2xl mb-4">
-                                        <i class="fa fa-star text-yellow-400"></i>
-                                        <i class="fa fa-star text-yellow-400"></i>
-                                        <i class="fa fa-star text-yellow-400"></i>
-                                        <i class="fa fa-star text-yellow-400"></i>
-                                        <i class="fa fa-star text-gray-300"></i>
+                                    <h4 class="font-medium text-gray-800 mt-4 mb-2">各类别概率</h4>
+                                    <div class="space-y-2">
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-700">
+                                                <span>低压力</span>
+                                                <span id="probLow">0.8459</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                                                <div id="progressLow" class="h-2 rounded-full bg-green-500" style="width: 84.59%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-700">
+                                                <span>中压力</span>
+                                                <span id="probMedium">0.0651</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                                                <div id="progressMedium" class="h-2 rounded-full bg-yellow-500" style="width: 6.51%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-700">
+                                                <span>高压力</span>
+                                                <span id="probHigh">0.0842</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                                                <div id="progressHigh" class="h-2 rounded-full bg-orange-500" style="width: 8.42%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-700">
+                                                <span>极高压力</span>
+                                                <span id="probExtreme">0.0047</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+                                                <div id="progressExtreme" class="h-2 rounded-full bg-red-500" style="width: 0.47%"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -784,6 +876,24 @@
                         <!-- 这里可以放置压力历史图表 -->
                         <div class="bg-gray-100 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center text-gray-400">
                             压力历史图表区域
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 视频播放模态框 -->
+                <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg w-11/12 max-w-4xl overflow-hidden">
+                        <div class="flex justify-between items-center px-4 py-3 bg-gray-100">
+                            <h3 id="videoModalTitle" class="font-medium text-gray-800"></h3>
+                            <button id="closeVideoModal" class="text-gray-500 hover:text-gray-700">
+                                <i class="fa fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <video id="videoPlayer" class="w-full" controls>
+                                <source id="videoSource" src="" type="video/mp4">
+                                您的浏览器不支持视频播放。
+                            </video>
                         </div>
                     </div>
                 </div>
@@ -884,55 +994,6 @@
     const resultSection = document.getElementById('resultSection');
     const resultValue = document.getElementById('resultValue');
 
-    startTestBtn.addEventListener('click', () => {
-        // 更新按钮状态
-        startTestBtn.textContent = "测试中...";
-        startTestBtn.disabled = true;
-
-        // 显示检测动画
-        detectionSection.classList.remove('hidden');
-        resultSection.classList.add('hidden');
-
-        // 重置进度条
-        detectionProgress.style.width = '0%';
-
-        // 模拟测试过程
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 1;
-            detectionProgress.style.width = `${progress}%`;
-
-            if (progress >= 100) {
-                clearInterval(interval);
-
-                // 完成测试
-                setTimeout(() => {
-                    // 随机生成压力等级 (1-10)
-                    const pressureLevel = Math.floor(Math.random() * 10) + 1;
-
-                    // 显示结果
-                    resultValue.textContent = pressureLevel;
-
-                    // 更新UI
-                    startTestBtn.textContent = "开始测试";
-                    startTestBtn.disabled = false;
-
-                    // 更新调节页面的当前等级
-                    const pressureSlider = document.getElementById('pressureSlider');
-                    const currentLevel = document.getElementById('currentLevel');
-                    pressureSlider.value = pressureLevel;
-                    currentLevel.textContent = pressureLevel;
-
-                    // 隐藏检测动画，显示结果
-                    detectionSection.classList.add('hidden');
-                    resultSection.classList.remove('hidden');
-
-                    // 发送数据到后端 (模拟)
-                    console.log('压力测试完成，等级:', pressureLevel);
-                }, 500);
-            }
-        }, 30); // 模拟3秒测试
-    });
 
     // 压力调节逻辑
     const pressureSlider = document.getElementById('pressureSlider');
@@ -943,13 +1004,30 @@
         currentLevel.textContent = pressureSlider.value;
     });
 
+    // 预设的视频资源
+    const methodVideos = {
+        'breathing': {
+            url: 'https://example.com/breathing.mp4',
+            title: '呼吸调节指导视频'
+        },
+        'music': {
+            url: 'https://example.com/relaxing_music.mp3',
+            title: '舒缓放松音乐'
+        },
+        'meditation': {
+            url: 'https://example.com/meditation.mp4',
+            title: '冥想指导视频'
+        }
+    };
+
     // 调节方法按钮
     methodBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const method = btn.dataset.method;
             const beforeLevel = parseInt(currentLevel.textContent);
+            const videoInfo = methodVideos[method];
 
-            // 模拟调节效果 (降低1-3级)
+            // 模拟调节效果
             const reduction = Math.floor(Math.random() * 3) + 1;
             let newLevel = beforeLevel - reduction;
             if (newLevel < 1) newLevel = 1;
@@ -960,6 +1038,33 @@
 
             // 显示通知
             showNotification(`使用${getMethodName(method)}成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
+
+            // 保存调节记录（包含视频信息）
+            const data = {
+                before_level: beforeLevel,
+                after_level: newLevel,
+                method: method,
+                video_url: videoInfo.url,
+                video_title: videoInfo.title
+            };
+
+            // 发送数据到后端
+            fetch('/save_adjustment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('调节记录保存成功');
+                } else {
+                    console.error('保存调节记录失败:', result.error);
+                }
+            });
         });
     });
 
@@ -1017,6 +1122,244 @@
             modal.style.display = 'none';
         }
     });
+
+
+    // 视频播放功能
+    const videoModal = document.getElementById('videoModal');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+    const videoModalTitle = document.getElementById('videoModalTitle');
+    const closeVideoModal = document.getElementById('closeVideoModal');
+
+    // 播放视频按钮事件
+    document.querySelectorAll('.play-video-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const videoUrl = btn.dataset.videoUrl;
+            const videoTitle = btn.dataset.videoTitle;
+
+            // 设置视频源和标题
+            videoSource.src = videoUrl;
+            videoModalTitle.textContent = videoTitle;
+
+            // 加载并播放视频
+            videoPlayer.load();
+
+            // 显示模态框
+            videoModal.classList.remove('hidden');
+        });
+    });
+
+    // 关闭视频模态框
+    closeVideoModal.addEventListener('click', () => {
+        videoPlayer.pause();
+        videoModal.classList.add('hidden');
+    });
+
+    // 点击模态框背景关闭
+    videoModal.addEventListener('click', (e) => {
+        if (e.target === videoModal) {
+            videoPlayer.pause();
+            videoModal.classList.add('hidden');
+        }
+    });
+
+
+    //---------------------------
+    // 获取 CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+    // 文件上传处理
+    const matFileInput = document.getElementById('matFile');
+    const fileNameDisplay = document.getElementById('fileName');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUploadSection = document.getElementById('fileUploadSection');
+
+    // 文件选择处理
+    matFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            fileNameDisplay.textContent = file.name;
+            uploadBtn.disabled = false;
+        } else {
+            fileNameDisplay.textContent = '未选择文件';
+            uploadBtn.disabled = true;
+        }
+    });
+
+    // 开始测试按钮逻辑修改
+    startTestBtn.addEventListener('click', () => {
+        // 隐藏结果区域（如果可见）
+        resultSection.classList.add('hidden');
+
+        // 显示文件上传区域
+        fileUploadSection.classList.remove('hidden');
+
+        // 更新按钮状态
+        startTestBtn.textContent = "取消测试";
+        startTestBtn.disabled = false;
+    });
+
+    // 上传按钮逻辑
+    uploadBtn.addEventListener('click', () => {
+        const file = matFileInput.files[0];
+        if (!file) return;
+
+        // 显示检测动画
+        detectionSection.classList.remove('hidden');
+        fileUploadSection.classList.add('hidden');
+
+        // 重置进度条
+        detectionProgress.style.width = '0%';
+
+        // 创建FormData对象
+        const formData = new FormData();
+        formData.append('mat_file', file);
+
+        // 显示上传进度
+        const progressInterval = setInterval(() => {
+            const currentWidth = parseInt(detectionProgress.style.width) || 0;
+            if (currentWidth < 80) {
+                detectionProgress.style.width = `${currentWidth + 2}%`;
+            }
+        }, 100);
+
+        // 发送文件到后端
+        fetch('/upload_mat/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearInterval(progressInterval);
+
+            if (data.success) {
+                // 更新进度条到100%
+                detectionProgress.style.width = '100%';
+
+                setTimeout(() => {
+                    // 显示结果
+                    const pressureLevel = data.pressure_level;
+                    const predictionLabel = data.prediction_label;
+                    resultValue.textContent = pressureLevel;
+
+                    // 更新详细结果
+                    document.getElementById('resultFileName').textContent = data.file_name;
+                    document.getElementById('pressureLevelLabel').textContent = predictionLabel;
+                    document.getElementById('resultBadge').textContent = predictionLabel;
+                    document.getElementById('resultBadge').className = `result-badge ${getPressureClass(pressureLevel)}`;
+                    document.getElementById('resultConfidence').textContent = data.confidence.toFixed(4);
+
+                    // 更新各类别概率
+                    const probabilities = data.probabilities;
+                    if (probabilities) {
+                        document.getElementById('probLow').textContent = probabilities['低压力']?.toFixed(4) || '0.0000';
+                        document.getElementById('probMedium').textContent = probabilities['中压力']?.toFixed(4) || '0.0000';
+                        document.getElementById('probHigh').textContent = probabilities['高压力']?.toFixed(4) || '0.0000';
+                        document.getElementById('probExtreme').textContent = probabilities['极高压力']?.toFixed(4) || '0.0000';
+
+                        // 更新进度条
+                        document.getElementById('progressLow').style.width = `${(probabilities['低压力'] || 0) * 100}%`;
+                        document.getElementById('progressMedium').style.width = `${(probabilities['中压力'] || 0) * 100}%`;
+                        document.getElementById('progressHigh').style.width = `${(probabilities['高压力'] || 0) * 100}%`;
+                        document.getElementById('progressExtreme').style.width = `${(probabilities['极高压力'] || 0) * 100}%`;
+                    }
+
+                    // 更新UI
+                    startTestBtn.textContent = "开始测试";
+                    startTestBtn.disabled = false;
+
+                    // 更新调节页面的当前等级
+                    pressureSlider.value = pressureLevel;
+                    currentLevel.textContent = pressureLevel;
+
+                    // 隐藏检测动画，显示结果
+                    detectionSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+
+                    // 保存测试结果
+                    saveTestResult(pressureLevel);
+                }, 500);
+            } else {
+                alert('文件分析失败: ' + data.error);
+                resetTestState();
+            }
+        })
+        .catch(error => {
+            clearInterval(progressInterval);
+            console.error('上传失败:', error);
+            alert('文件上传失败，请重试');
+            resetTestState();
+        });
+    });
+
+    // 根据压力等级获取标签
+    function getPressureLabel(level) {
+        if (level <= 3) return '低压力';
+        if (level <= 6) return '中压力';
+        if (level <= 8) return '高压力';
+        return '极高压力';
+    }
+
+    // 根据压力等级获取CSS类
+    function getPressureClass(level) {
+        if (level <= 3) return 'result-good';
+        if (level <= 6) return 'result-medium';
+        if (level <= 8) return 'result-bad';
+        return 'result-bad'; // 极高压力也使用红色
+    }
+
+    // 保存测试结果函数
+    function saveTestResult(pressureLevel) {
+        const data = {
+            pressure_level: pressureLevel,
+            duration: 60 // 模拟测试持续时间
+        };
+
+        fetch('/save_test/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('测试结果保存成功');
+            } else {
+                console.error('保存测试结果失败:', result.error);
+            }
+        });
+    }
+
+    // 重置测试状态
+    function resetTestState() {
+        startTestBtn.textContent = "开始测试";
+        startTestBtn.disabled = false;
+        detectionSection.classList.add('hidden');
+        fileUploadSection.classList.add('hidden');
+        matFileInput.value = '';
+        fileNameDisplay.textContent = '未选择文件';
+        uploadBtn.disabled = true;
+    }
 </script>
 
 </body>

@@ -116,7 +116,10 @@ def save_adjustment(request):
                 user=request.user,
                 before_level=data['before_level'],
                 after_level=data['after_level'],
-                method=data['method']
+                method=data['method'],
+                # 添加视频信息
+                video_url=data.get('video_url', ''),
+                video_title=data.get('video_title', '')
             )
             return JsonResponse({'success': True})
         except Exception as e:
@@ -147,4 +150,128 @@ def edit_profile(request):
     return render(request, 'profile_edit.html', {
         'form': form,
         'user': request.user  # 确保 user 对象传递给模板
+    })
+
+
+import os
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.http import JsonResponse
+import scipy.io
+import numpy as np
+from scipy.signal import welch
+from .models import PressureTest
+
+
+# 压力分析函数 (示例实现)
+def analyze_pressure(mat_data):
+    """
+    从.mat文件中提取生理信号数据并分析压力水平
+    这里是一个简化的示例实现
+    """
+    try:
+        # 假设.mat文件包含名为'ecg'的ECG信号和名为'gsr'的皮电反应数据
+        ecg_signal = mat_data['ecg'].flatten()
+        gsr_signal = mat_data['gsr'].flatten()
+
+        # 计算ECG信号的HRV (心率变异性)
+        # 在实际应用中，这里会有更复杂的处理
+        rr_intervals = np.diff(np.where(ecg_signal > 0.5)[0])
+        hrv = np.std(rr_intervals) if len(rr_intervals) > 0 else 50
+
+        # 计算皮电反应的特征
+        gsr_mean = np.mean(gsr_signal)
+
+        # 简化的压力水平计算 (实际应用会有更复杂的模型)
+        pressure_level = min(10, max(1, int(10 - (hrv / 20) + (gsr_mean / 2000))))
+
+        return pressure_level
+    except Exception as e:
+        raise ValueError(f"数据分析错误: {str(e)}")
+
+
+import requests
+
+
+# 修改后的 upload_mat 函数
+@csrf_exempt
+@login_required
+def upload_mat(request):
+    """处理.mat文件上传和分析"""
+    if request.method == 'POST' and request.FILES.get('mat_file'):
+        try:
+            # 获取上传的文件
+            mat_file = request.FILES['mat_file']
+
+            # 设置API接口地址
+            API_URL = "http://localhost:8000/predict"
+
+            # 准备文件数据
+            files = {'file': (mat_file.name, mat_file, 'application/octet-stream')}
+
+            try:
+                # 发送请求到API接口
+                response = requests.post(API_URL, files=files)
+
+                # 检查响应状态
+                if response.status_code != 200:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'API服务错误: 状态码 {response.status_code}'
+                    })
+
+                # 解析API返回的JSON数据
+                api_data = response.json()
+
+                # 提取所需数据
+                prediction = api_data.get('prediction', '中压力')
+                confidence = api_data.get('confidence', 0.0)
+                probabilities = api_data.get('probabilities', [])
+                class_names = api_data.get('class_names', [])
+
+                # 创建概率字典
+                probabilities_dict = {}
+                if probabilities and class_names and len(probabilities) == len(class_names):
+                    probabilities_dict = {name: prob for name, prob in zip(class_names, probabilities)}
+
+                # 映射压力等级数值（1-10）
+                pressure_level_map = {
+                    "低压力": 3,
+                    "中压力": 6,
+                    "高压力": 8,
+                    "极高压力": 10
+                }
+                pressure_level = pressure_level_map.get(prediction, 5)
+
+                # 返回分析结果
+                return JsonResponse({
+                    'success': True,
+                    'file_name': mat_file.name,
+                    'pressure_level': pressure_level,
+                    'confidence': confidence,
+                    'probabilities': probabilities_dict,
+                    'prediction_label': prediction,
+                    'message': '分析成功'
+                })
+
+            except requests.exceptions.RequestException as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'API连接失败: {str(e)}'
+                })
+            except ValueError as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'API返回数据解析错误: {str(e)}'
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+
+    return JsonResponse({
+        'success': False,
+        'error': '无效的请求或未上传文件'
     })
