@@ -17,4 +17,7 @@ urlpatterns = [
 
 
     path('upload_mat/', views.upload_mat, name='upload_mat'),
+
+
+    path('recommendation/', include('recommendation.urls')),
 ]

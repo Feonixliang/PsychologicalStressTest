@@ -690,7 +690,7 @@
                         </div>
                     </div>
 
-                    <!-- 中间面板 - 压力调节 -->
+                    <!-- 压力调节面板 -->
                     <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-xl font-bold text-gray-800">压力调节</h2>
@@ -700,75 +700,17 @@
                         </div>
 
                         <div class="level-display">
-                            当前压力等级: <span id="currentLevel">5</span>/10
+                            当前压力等级: <span id="currentLevel">3</span>/5
                         </div>
 
                         <div class="slider-container">
-                            <input type="range" min="1" max="10" value="5" class="slider" id="pressureSlider">
-                        </div>
-
-                        <div class="adjust-buttons">
-                            <button class="method-btn" data-method="breathing">呼吸调节</button>
-                            <button class="method-btn" data-method="music">音乐疗法</button>
-                            <button class="method-btn" data-method="meditation">冥想指导</button>
+                            <input type="range" min="1" max="5" value="3" class="slider" id="pressureSlider">
                         </div>
 
                         <div class="mt-8">
                             <h3 class="text-lg font-medium text-gray-700 mb-4">推荐调节方法</h3>
-                            <div class="recommendation-grid">
-                                <div class="recommendation-card">
-                                    <div class="flex items-start">
-                                        <div class="recommendation-icon">
-                                            <i class="fa fa-play-circle"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium text-gray-800 mb-1">放松视频</h4>
-                                            <p class="text-sm text-gray-600">5分钟自然风光视频</p>
-                                            <div class="mt-2">
-                                                <div class="flex justify-between text-sm">
-                                                    <span>匹配度</span>
-                                                    <span>92%</span>
-                                                </div>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: 92%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- 添加播放按钮 -->
-                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
-                                                    data-video-url="https://example.com/video1.mp4"
-                                                    data-video-title="自然风光放松视频">
-                                                <i class="fa fa-play mr-1"></i>播放视频
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="recommendation-card">
-                                    <div class="flex items-start">
-                                        <div class="recommendation-icon">
-                                            <i class="fa fa-music"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium text-gray-800 mb-1">舒缓音乐</h4>
-                                            <p class="text-sm text-gray-600">轻音乐精选合集</p>
-                                            <div class="mt-2">
-                                                <div class="flex justify-between text-sm">
-                                                    <span>匹配度</span>
-                                                    <span>85%</span>
-                                                </div>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: 85%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- 添加播放按钮 -->
-                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
-                                                    data-video-url="https://example.com/music1.mp3"
-                                                    data-video-title="轻音乐精选">
-                                                <i class="fa fa-play mr-1"></i>播放音乐
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="recommendation-grid" id="recommendationGrid">
+                                <!-- 推荐内容会动态加载到这里 -->
                             </div>
                         </div>
                     </div>
@@ -934,6 +876,22 @@
 
         // 初始化用户菜单
         initUserMenu();
+
+        // 获取开始测试按钮
+        const startTestBtn = document.getElementById('startTest');
+
+        // 添加事件监听器
+        startTestBtn.addEventListener('click', () => {
+        // 隐藏结果区域（如果可见）
+        resultSection.classList.add('hidden');
+
+        // 显示文件上传区域
+        fileUploadSection.classList.remove('hidden');
+
+        // 更新按钮状态
+        startTestBtn.textContent = "取消测试";
+        startTestBtn.disabled = false;
+        });
     });
 
     // 初始化检测动画
@@ -987,108 +945,153 @@
         });
     }
 
-    // 压力测试逻辑
-    const startTestBtn = document.getElementById('startTest');
-    const detectionProgress = document.getElementById('detectionProgress');
-    const detectionSection = document.getElementById('detectionSection');
-    const resultSection = document.getElementById('resultSection');
-    const resultValue = document.getElementById('resultValue');
-
-
     // 压力调节逻辑
     const pressureSlider = document.getElementById('pressureSlider');
     const currentLevel = document.getElementById('currentLevel');
-    const methodBtns = document.querySelectorAll('.method-btn');
+    const recommendationGrid = document.getElementById('recommendationGrid');
 
     pressureSlider.addEventListener('input', () => {
-        currentLevel.textContent = pressureSlider.value;
+        const stressLevel = parseInt(pressureSlider.value);
+        currentLevel.textContent = stressLevel;
+        getRecommendations(stressLevel);
     });
 
-    // 预设的视频资源
-    const methodVideos = {
-        'breathing': {
-            url: 'https://example.com/breathing.mp4',
-            title: '呼吸调节指导视频'
-        },
-        'music': {
-            url: 'https://example.com/relaxing_music.mp3',
-            title: '舒缓放松音乐'
-        },
-        'meditation': {
-            url: 'https://example.com/meditation.mp4',
-            title: '冥想指导视频'
-        }
-    };
+    // 获取推荐视频
+    function getRecommendations(stressLevel) {
+        fetch('/recommendation/recommend/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ stress_level: stressLevel })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateRecommendations(data.recommended_videos);
+            } else {
+                console.error('获取推荐失败:', data.error);
+            }
+        })
+        .catch(error => console.error('请求错误:', error));
+    }
 
-    // 调节方法按钮
-    methodBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const method = btn.dataset.method;
-            const beforeLevel = parseInt(currentLevel.textContent);
-            const videoInfo = methodVideos[method];
+    // 更新推荐显示
+    function updateRecommendations(videos) {
+        recommendationGrid.innerHTML = '';
 
-            // 模拟调节效果
-            const reduction = Math.floor(Math.random() * 3) + 1;
-            let newLevel = beforeLevel - reduction;
-            if (newLevel < 1) newLevel = 1;
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.innerHTML = `
+                <div class="flex items-start">
+                    <div class="recommendation-icon">
+                        <i class="fa fa-play-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-1">${video.name}</h4>
+                        <p class="text-sm text-gray-600">${video.description}</p>
+                        <div class="mt-2">
+                            <div class="flex justify-between text-sm">
+                                <span>时长</span>
+                                <span>${video.duration_minutes}分钟</span>
+                            </div>
+                        </div>
+                        <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
+                                data-video-url="${video.video_url}"
+                                data-video-title="${video.name}"
+                                data-video-id="${video.id}">
+                            <i class="fa fa-play mr-1"></i>播放视频
+                        </button>
+                    </div>
+                </div>
+            `;
+            recommendationGrid.appendChild(card);
+        });
 
-            // 更新显示
-            currentLevel.textContent = newLevel;
-            pressureSlider.value = newLevel;
+        // 重新绑定播放按钮事件
+        document.querySelectorAll('.play-video-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const videoUrl = btn.dataset.videoUrl;
+                const videoTitle = btn.dataset.videoTitle;
+                const videoId = btn.dataset.videoId;
 
-            // 显示通知
-            showNotification(`使用${getMethodName(method)}成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
+                // 记录播放前的压力等级
+                const preStress = parseInt(currentLevel.textContent);
 
-            // 保存调节记录（包含视频信息）
-            const data = {
-                before_level: beforeLevel,
-                after_level: newLevel,
-                method: method,
-                video_url: videoInfo.url,
-                video_title: videoInfo.title
-            };
-
-            // 发送数据到后端
-            fetch('/save_adjustment/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log('调节记录保存成功');
-                } else {
-                    console.error('保存调节记录失败:', result.error);
-                }
+                // 播放视频
+                playVideo(videoId, preStress, videoTitle, videoUrl);
             });
         });
-    });
+    }
 
-    // 获取方法名称
-    function getMethodName(method) {
-        const methods = {
-            'breathing': '呼吸调节',
-            'music': '音乐疗法',
-            'meditation': '冥想指导'
+    // 播放视频
+    function playVideo(videoId, preStress, videoTitle, videoUrl) {
+        // 设置视频源和标题
+        videoSource.src = videoUrl;
+        videoModalTitle.textContent = videoTitle;
+
+        // 加载视频
+        videoPlayer.load();
+
+        // 显示模态框
+        videoModal.classList.remove('hidden');
+
+        // 视频结束后的事件处理
+        videoPlayer.onended = function() {
+            // 视频播放结束，弹出评分框
+            const rating = prompt('请为这个视频的降压效果评分（1-5分）:');
+            if (rating !== null) {
+                // 用户输入了评分
+                const postStress = parseInt(document.getElementById('currentLevel').textContent);
+
+                // 获取所有推荐视频ID
+                const recommendedIds = [];
+                document.querySelectorAll('.play-video-btn').forEach(btn => {
+                    recommendedIds.push(parseInt(btn.dataset.videoId));
+                });
+
+                // 提交反馈
+                submitFeedback(preStress, postStress, parseInt(videoId), recommendedIds, parseInt(rating));
+
+                // 更新压力等级显示
+                document.getElementById('currentLevel').textContent = postStress;
+                pressureSlider.value = postStress;
+            }
         };
-        return methods[method] || method;
     }
 
-    // 显示通知
-    function showNotification(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+    // 提交反馈
+    function submitFeedback(preStress, postStress, selectedVideoId, recommendedVideoIds, rating) {
+        fetch('/recommendation/feedback/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                pre_stress: preStress,
+                post_stress: postStress,
+                selected_video_id: selectedVideoId,
+                recommended_video_ids: recommendedVideoIds,
+                rating: rating
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('提交反馈失败:', data.error);
+            }
+        })
+        .catch(error => console.error('请求错误:', error));
     }
+
+    // 页面加载时获取初始推荐
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialStress = parseInt(currentLevel.textContent);
+        getRecommendations(initialStress);
+    });
 
     // 爱好调查模态窗口处理
     document.addEventListener('DOMContentLoaded', () => {
@@ -1200,18 +1203,6 @@
         }
     });
 
-    // 开始测试按钮逻辑修改
-    startTestBtn.addEventListener('click', () => {
-        // 隐藏结果区域（如果可见）
-        resultSection.classList.add('hidden');
-
-        // 显示文件上传区域
-        fileUploadSection.classList.remove('hidden');
-
-        // 更新按钮状态
-        startTestBtn.textContent = "取消测试";
-        startTestBtn.disabled = false;
-    });
 
     // 上传按钮逻辑
     uploadBtn.addEventListener('click', () => {
@@ -1360,6 +1351,156 @@
         fileNameDisplay.textContent = '未选择文件';
         uploadBtn.disabled = true;
     }
+
+    // 在JavaScript部分添加转换函数
+    function convertTo5Level(level) {
+        if (level <= 2) return 1;
+        if (level <= 4) return 2;
+        if (level <= 6) return 3;
+        if (level <= 8) return 4;
+        return 5;
+    }
+    // 获取推荐视频
+    function getRecommendations(stressLevel) {
+        const stressLevel5 = convertTo5Level(stressLevel);
+        fetch('/recommendation/recommend/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ stress_level: stressLevel5 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateRecommendations(data.recommended_videos);
+            } else {
+                console.error('获取推荐失败:', data.error);
+            }
+        })
+        .catch(error => console.error('请求错误:', error));
+    }
+
+    // 更新推荐显示
+    function updateRecommendations(videos) {
+        const grid = document.querySelector('.recommendation-grid');
+        grid.innerHTML = '';
+
+        videos.forEach(video => {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.innerHTML = `
+                <div class="flex items-start">
+                    <div class="recommendation-icon">
+                        <i class="fa fa-play-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-1">${video.name}</h4>
+                        <p class="text-sm text-gray-600">${video.description}</p>
+                        <div class="mt-2">
+                            <div class="flex justify-between text-sm">
+                                <span>时长</span>
+                                <span>${video.duration_minutes}分钟</span>
+                            </div>
+                        </div>
+                        <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
+                                data-video-url="${video.video_url}"
+                                data-video-title="${video.name}"
+                                data-video-id="${video.id}">
+                            <i class="fa fa-play mr-1"></i>播放视频
+                        </button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // 重新绑定播放按钮事件
+        document.querySelectorAll('.play-video-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const videoUrl = btn.dataset.videoUrl;
+                const videoTitle = btn.dataset.videoTitle;
+                const videoId = btn.dataset.videoId;
+
+                // 播放视频
+                playVideo(videoId, videoTitle, videoUrl);
+            });
+        });
+    }
+
+    // 提交反馈
+    function submitFeedback(preStress, postStress, selectedVideoId, recommendedVideoIds, rating) {
+        fetch('/recommendation/feedback/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                pre_stress: preStress,
+                post_stress: postStress,
+                selected_video_id: selectedVideoId,
+                recommended_video_ids: recommendedVideoIds,
+                rating: rating
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('提交反馈失败:', data.error);
+            }
+        })
+        .catch(error => console.error('请求错误:', error));
+    }
+
+    // 修改播放视频函数，添加反馈提交
+    function playVideo(videoId, videoTitle, videoUrl) {
+        // 记录当前压力等级
+        const currentStress = parseInt(document.getElementById('currentLevel').textContent);
+
+        // 设置视频源和标题
+        videoSource.src = videoUrl;
+        videoModalTitle.textContent = videoTitle;
+
+        // 加载视频
+        videoPlayer.load();
+
+        // 显示模态框
+        videoModal.classList.remove('hidden');
+
+        // 视频结束后提交反馈
+        videoPlayer.onended = function() {
+            // 假设压力降低1级
+            const newStress = Math.max(1, currentStress - 1);
+
+            // 获取所有推荐视频ID
+            const recommendedIds = [];
+            document.querySelectorAll('.play-video-btn').forEach(btn => {
+                recommendedIds.push(parseInt(btn.dataset.videoId));
+            });
+
+            // 提交反馈
+            submitFeedback(currentStress, newStress, parseInt(videoId), recommendedIds, 4);
+
+            // 更新压力等级显示
+            document.getElementById('currentLevel').textContent = newStress;
+            pressureSlider.value = newStress;
+        };
+    }
+
+    // 在压力滑块变化时获取推荐
+    pressureSlider.addEventListener('input', () => {
+        const stressLevel = parseInt(pressureSlider.value);
+        currentLevel.textContent = stressLevel;
+        getRecommendations(stressLevel);
+    });
+
+    // 页面加载时获取初始推荐
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialStress = parseInt(currentLevel.textContent);
+        getRecommendations(initialStress);
+    });
 </script>
 
 </body>

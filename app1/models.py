@@ -66,26 +66,19 @@ def save_user_profile(sender, instance, **kwargs):
 class PressureTest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     test_time = models.DateTimeField(auto_now_add=True)
-    pressure_level = models.IntegerField(choices=[(i, f"Level {i}") for i in range(1, 11)])  # 1-10级
-    duration = models.IntegerField(help_text="测试持续时间(秒)")  # 测试持续时间
-
-    def __str__(self):
-        return f"{self.user.username} - {self.get_pressure_level_display()} at {self.test_time}"
-
+    # 改为1-5级
+    pressure_level = models.IntegerField(choices=[(i, f"Level {i}") for i in range(1, 6)])
+    duration = models.IntegerField(help_text="测试持续时间(秒)")
 
 class PressureAdjustment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     adjust_time = models.DateTimeField(auto_now_add=True)
-    before_level = models.IntegerField()
-    after_level = models.IntegerField()
+    # 改为1-5级
+    before_level = models.IntegerField(choices=[(i, f"Level {i}") for i in range(1, 6)])
+    after_level = models.IntegerField(choices=[(i, f"Level {i}") for i in range(1, 6)])
     method = models.CharField(max_length=100, choices=[
-        ('breathing', '呼吸法'),
-        ('music', '音乐疗法'),
-        ('meditation', '冥想'),
-        ('exercise', '运动'),
+        ('video', '视频疗法'),
     ])
-    video_url = models.URLField('视频链接', blank=True, null=True)
-    video_title = models.CharField('视频标题', max_length=255, blank=True, null=True)
+    video_url = models.URLField('视频链接')
+    video_title = models.CharField('视频标题', max_length=255)
 
-    def __str__(self):
-        return f"{self.user.username}: {self.before_level} → {self.after_level}"

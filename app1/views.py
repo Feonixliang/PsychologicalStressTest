@@ -106,6 +106,7 @@ def save_test(request):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+@csrf_exempt
 @login_required
 def save_adjustment(request):
     """保存压力调节记录"""
@@ -116,8 +117,7 @@ def save_adjustment(request):
                 user=request.user,
                 before_level=data['before_level'],
                 after_level=data['after_level'],
-                method=data['method'],
-                # 添加视频信息
+                method='video',  # 固定为视频疗法
                 video_url=data.get('video_url', ''),
                 video_title=data.get('video_title', '')
             )

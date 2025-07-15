@@ -1,0 +1,143 @@
+# EEG压力降低视频推荐系统配置文件
+
+# ===== 基础推荐设置 =====
+recommendation_size: 3  # 每次推荐的视频数量
+
+# ===== 压力等级定义 =====
+# 5个压力等级，对应脑电预测模型的输出
+stress_levels:
+  - "压力等级1(轻度)"
+  - "压力等级2(轻中度)"  
+  - "压力等级3(中度)"
+  - "压力等级4(中重度)"
+  - "压力等级5(重度)"
+
+# ===== 降压视频库 =====
+videos:
+  - "深度呼吸练习"
+  - "渐进性肌肉放松"
+  - "正念冥想指导"
+  - "自然声音放松"
+  - "瑜伽舒缓动作"
+  - "音乐疗法"
+  - "视觉化放松"
+  - "身体扫描冥想"
+  - "压力释放技巧"
+  - "快速放松法"
+  - "情绪调节训练"
+  - "专注力训练"
+
+# ===== 视频详细信息 =====
+video_dict:
+  "深度呼吸练习":
+    description: "通过深度呼吸技巧快速降低压力水平"
+    duration_minutes: 5
+    video_url: "https://example.com/videos/deep_breathing.mp4"
+    thumbnail: "deep_breathing.jpg"
+  
+  "渐进性肌肉放松":
+    description: "系统性地放松身体各部位肌肉群"
+    duration_minutes: 15
+    video_url: "https://example.com/videos/muscle_relaxation.mp4"
+    thumbnail: "muscle_relaxation.jpg"
+  
+  "正念冥想指导":
+    description: "引导式正念冥想，提升当下觉察"
+    duration_minutes: 10
+    video_url: "https://example.com/videos/mindfulness.mp4"
+    thumbnail: "mindfulness.jpg"
+  
+  "自然声音放松":
+    description: "聆听自然音效，缓解心理压力"
+    duration_minutes: 8
+    video_url: "https://example.com/videos/nature_sounds.mp4"
+    thumbnail: "nature_sounds.jpg"
+  
+  "瑜伽舒缓动作":
+    description: "简单瑜伽动作，缓解身心紧张"
+    duration_minutes: 12
+    video_url: "https://example.com/videos/yoga.mp4"
+    thumbnail: "yoga.jpg"
+  
+  "音乐疗法":
+    description: "专门设计的减压音乐疗法"
+    duration_minutes: 7
+    video_url: "https://example.com/videos/music_therapy.mp4"
+    thumbnail: "music_therapy.jpg"
+  
+  "视觉化放松":
+    description: "通过想象技巧达到深度放松"
+    duration_minutes: 6
+    video_url: "https://example.com/videos/visualization.mp4"
+    thumbnail: "visualization.jpg"
+  
+  "身体扫描冥想":
+    description: "系统性地觉察和放松身体"
+    duration_minutes: 20
+    video_url: "https://example.com/videos/body_scan.mp4"
+    thumbnail: "body_scan.jpg"
+  
+  "压力释放技巧":
+    description: "快速有效的压力释放方法"
+    duration_minutes: 4
+    video_url: "https://example.com/videos/stress_release.mp4"
+    thumbnail: "stress_release.jpg"
+  
+  "快速放松法":
+    description: "紧急情况下的快速减压技巧"
+    duration_minutes: 3
+    video_url: "https://example.com/videos/quick_relax.mp4"
+    thumbnail: "quick_relax.jpg"
+  
+  "情绪调节训练":
+    description: "学习识别和调节负面情绪"
+    duration_minutes: 18
+    video_url: "https://example.com/videos/emotion_regulation.mp4"
+    thumbnail: "emotion_regulation.jpg"
+  
+  "专注力训练":
+    description: "提升专注力，减少压力反应"
+    duration_minutes: 9
+    video_url: "https://example.com/videos/focus_training.mp4"
+    thumbnail: "focus_training.jpg"
+
+# ===== 避免推荐规则 =====
+# 每个压力等级下不适合推荐的视频索引
+avoid_indices:
+  # 压力等级1(轻度): 避免过长的视频
+  - [7, 10]  # 身体扫描冥想(20分钟)、情绪调节训练(18分钟)
+  
+  # 压力等级2(轻中度): 避免复杂技巧
+  - [7]      # 身体扫描冥想
+  
+  # 压力等级3(中度): 均衡推荐
+  - []
+  
+  # 压力等级4(中重度): 避免过短的视频，需要更深层放松
+  - [9]      # 快速放松法(3分钟)
+  
+  # 压力等级5(重度): 避免复杂和过长的技巧，专注快速有效的方法
+  - [1, 7, 10]  # 渐进性肌肉放松、身体扫描冥想、情绪调节训练
+
+# ===== 压力降低奖励计算参数 =====
+stress_reduction_threshold: 1.0    # 有效降压的最小阈值
+max_stress_increase: 0.5          # 可接受的最大压力增加量
+
+# ===== 负反馈学习设置 =====
+modify_non_selected: true        # 是否对未选择的视频给予负面反馈
+threshold_num: 10                # 开始负面反馈学习的最小选择次数
+auxiliary_rewards: -0.1         # 未选择视频的奖励值(负值)
+
+# ===== 用户聚类功能 =====
+enable_cluster: true            # 启用用户聚类协同过滤
+cluster_reco_ratio: 0.3        # 聚类推荐权重
+mab_reco_ratio: 0.7            # MAB推荐权重
+cluster_refresh_threshold: 50  # 聚类刷新频率(每50次选择)
+assign_cluster_num: 5          # 分配到聚类的最小选择次数
+recluster_threshold: 100       # 重新聚类的阈值
+
+# ===== 文件路径配置 =====
+video_folder_name: "videos"     # 视频文件夹名称
+thumbnail_folder_name: "thumbnails"  # 缩略图文件夹名称
+general_data_platform: "total_data"  # 总体数据平台标识
+general_data_user_hash: "total"      # 总体数据用户标识 

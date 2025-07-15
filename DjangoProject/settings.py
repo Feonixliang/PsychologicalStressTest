@@ -19,7 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app1'
+    'app1',
+    'recommendation.apps.RecommendationConfig',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +89,6 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # 认证相关设置
 LOGIN_URL = 'login'
