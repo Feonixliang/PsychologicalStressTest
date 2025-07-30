@@ -651,24 +651,23 @@
                     <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-xl font-bold text-gray-800">压力测试</h2>
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-blue-极客100 flex items-center justify-center">
                                 <i class="fa fa-heartbeat text-blue-600"></i>
                             </div>
                         </div>
 
-                        <!-- 在压力测试面板内修改测试按钮部分 -->
                         <div class="text-center py-4">
                             <button id="startTest" class="test-button mx-auto">
                                 开始测试
                                 <span class="absolute -bottom-8 text-sm text-gray-600">请保持放松状态</span>
                             </button>
 
-                            <!-- 添加文件上传区域 -->
+                            <!-- 文件上传区域 -->
                             <div id="fileUploadSection" class="mt-6 hidden">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">上传生理信号数据(.mat)</label>
                                 <div class="flex items-center justify-center">
                                     <label for="matFile" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                                        <i class="fa fa-upload mr-2"></i>选择文件
+                                        <i极客 class="fa fa-upload mr-2"></i>选择文件
                                     </label>
                                     <input type="file" id="matFile" accept=".mat" class="hidden">
                                     <span id="fileName" class="ml-3 text-sm text-gray-600">未选择文件</span>
@@ -681,8 +680,7 @@
 
                         <div class="mt-8">
                             <h3 class="text-lg font-medium text-gray-700 mb-4">最近测试记录</h3>
-                            <div class="space-y-3">
-                                <!-- 测试记录会动态加载 -->
+                            <div class="space-y-3" id="testRecords">
                                 <div class="text-center py-4 text-gray-500">
                                     暂无测试记录
                                 </div>
@@ -700,11 +698,11 @@
                         </div>
 
                         <div class="level-display">
-                            当前压力等级: <span id="currentLevel">5</span>/10
+                            当前压力等级: <span id="currentLevel">3</span>/4
                         </div>
 
                         <div class="slider-container">
-                            <input type="range" min="1" max="10" value="5" class="slider" id="pressureSlider">
+                            <input type="range" min="0" max="4" value="1" class="slider" id="pressureSlider">
                         </div>
 
                         <div class="adjust-buttons">
@@ -715,60 +713,8 @@
 
                         <div class="mt-8">
                             <h3 class="text-lg font-medium text-gray-700 mb-4">推荐调节方法</h3>
-                            <div class="recommendation-grid">
-                                <div class="recommendation-card">
-                                    <div class="flex items-start">
-                                        <div class="recommendation-icon">
-                                            <i class="fa fa-play-circle"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium text-gray-800 mb-1">放松视频</h4>
-                                            <p class="text-sm text-gray-600">5分钟自然风光视频</p>
-                                            <div class="mt-2">
-                                                <div class="flex justify-between text-sm">
-                                                    <span>匹配度</span>
-                                                    <span>92%</span>
-                                                </div>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: 92%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- 添加播放按钮 -->
-                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
-                                                    data-video-url="https://example.com/video1.mp4"
-                                                    data-video-title="自然风光放松视频">
-                                                <i class="fa fa-play mr-1"></i>播放视频
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="recommendation-card">
-                                    <div class="flex items-start">
-                                        <div class="recommendation-icon">
-                                            <i class="fa fa-music"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium text-gray-800 mb-1">舒缓音乐</h4>
-                                            <p class="text-sm text-gray-600">轻音乐精选合集</p>
-                                            <div class="mt-2">
-                                                <div class="flex justify-between text-sm">
-                                                    <span>匹配度</span>
-                                                    <span>85%</span>
-                                                </div>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: 85%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- 添加播放按钮 -->
-                                            <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
-                                                    data-video-url="https://example.com/music1.mp3"
-                                                    data-video-title="轻音乐精选">
-                                                <i class="fa fa-play mr-1"></i>播放音乐
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="recommendation-grid" id="recommendationContainer">
+                                <!-- 推荐内容会动态加载 -->
                             </div>
                         </div>
                     </div>
@@ -782,14 +728,14 @@
                             </div>
                         </div>
 
-                        <div id="detectionSection">
+                        <div id="detectionSection" class="hidden">
                             <div class="detection-animation">
                                 <div class="circle circle-1"></div>
                                 <div class="circle circle-2"></div>
                                 <div class="circle circle-3"></div>
                                 <div class="circle circle-4"></div>
                                 <div class="brain-icon">
-                                    <i class="fa fa-brain"></i>
+                                    <i class="fa fa-brain"></极客i>
                                 </div>
                             </div>
 
@@ -873,27 +819,8 @@
                 <div class="mt-10 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-lg p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-6">压力历史记录</h2>
                     <div class="h-64">
-                        <!-- 这里可以放置压力历史图表 -->
                         <div class="bg-gray-100 border-2 border-dashed rounded-xl w-full h-full flex items-center justify-center text-gray-400">
                             压力历史图表区域
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 视频播放模态框 -->
-                <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white rounded-lg w-11/12 max-w-4xl overflow-hidden">
-                        <div class="flex justify-between items-center px-4 py-3 bg-gray-100">
-                            <h3 id="videoModalTitle" class="font-medium text-gray-800"></h3>
-                            <button id="closeVideoModal" class="text-gray-500 hover:text-gray-700">
-                                <i class="fa fa-times text-xl"></i>
-                            </button>
-                        </div>
-                        <div class="p-4">
-                            <video id="videoPlayer" class="w-full" controls>
-                                <source id="videoSource" src="" type="video/mp4">
-                                您的浏览器不支持视频播放。
-                            </video>
                         </div>
                     </div>
                 </div>
@@ -910,320 +837,146 @@
         </footer>
     </div>
 
+    <!-- 视频播放模态框 -->
+    <div id="videoModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-11/12 max-w-4xl overflow-hidden">
+            <div class="flex justify-between items-center px-4 py-3 bg-gray-100">
+                <h3 id="videoModalTitle" class="font-medium text-gray-800"></h3>
+                <button id="closeVideoModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <video id="videoPlayer" class="w-full" controls>
+                    <source id="videoSource" src="" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedbackModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>请提供反馈</h3>
+        <p>观看视频后您的压力变化：</p>
+        <div class="feedback-sliders">
+          <label>观看前压力: <span id="preStressValue">3</span></label>
+          <input type="range" min="1" max="5" value="3" id="preStressSlider">
+
+          <label>观看后压力: <span id="postStressValue">2</span></label>
+          <input type="range" min="1" max="5" value="2" id="postStressSlider">
+        </div>
+        <button id="submitFeedback">提交反馈</button>
+      </div>
+    </div>
+
     <script>
-    // 用户信息模拟
+    // ================== 全局状态和配置 ==================
     const userData = {
         isAuthenticated: true,
         username: "{{ user.username }}",
-        latestLevel: 5
+        latestLevel: 3
     };
 
-    // 页面初始化
-    document.addEventListener('DOMContentLoaded', () => {
+    // ================== DOM元素引用 ==================
+    const domRefs = {
+        pressureSlider: document.getElementById('pressureSlider'),
+        currentLevel: document.getElementById('currentLevel'),
+        startTestBtn: document.getElementById('startTest'),
+        detectionProgress: document.getElementById('detectionProgress'),
+        detectionSection: document.getElementById('detectionSection'),
+        resultSection: document.getElementById('resultSection'),
+        resultValue: document.getElementById('resultValue'),
+        matFileInput: document.getElementById('matFile'),
+        fileNameDisplay: document.getElementById('fileName'),
+        uploadBtn: document.getElementById('uploadBtn'),
+        fileUploadSection: document.getElementById('fileUploadSection'),
+        videoModal: document.getElementById('videoModal'),
+        videoPlayer: document.getElementById('videoPlayer'),
+        videoSource: document.getElementById('videoSource'),
+        videoModalTitle: document.getElementById('videoModalTitle'),
+        testRecords: document.getElementById('testRecords'),
+        recommendationContainer: document.getElementById('recommendationContainer')
+    };
+
+    // ================== 初始化函数 ==================
+    function initApp() {
         // 设置压力等级
-        const pressureSlider = document.getElementById('pressureSlider');
-        const currentLevel = document.getElementById('currentLevel');
-        pressureSlider.value = userData.latestLevel;
-        currentLevel.textContent = userData.latestLevel;
+        domRefs.pressureSlider.value = userData.latestLevel;
+        domRefs.currentLevel.textContent = userData.latestLevel;
 
-        // 初始化结果面板
-        document.getElementById('resultSection').classList.add('hidden');
+        // 初始化事件监听
+        initEventListeners();
 
-        // 初始化检测动画
-        initDetectionAnimation();
+        // 加载推荐内容
+        loadRecommendations();
 
-        // 初始化用户菜单
+        // 加载测试记录
+        loadTestRecords();
+    }
+
+    // ================== 事件监听器初始化 ==================
+    function initEventListeners() {
+        // 压力滑块事件
+        domRefs.pressureSlider.addEventListener('input', () => {
+            domRefs.currentLevel.textContent = domRefs.pressureSlider.value;
+        });
+
+        // 开始测试按钮
+        domRefs.startTestBtn.addEventListener('click', handleStartTest);
+
+        // 文件上传处理
+        domRefs.matFileInput.addEventListener('change', handleFileSelect);
+        domRefs.uploadBtn.addEventListener('click', handleFileUpload);
+
+        // 调节方法按钮
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', handleMethodSelection);
+        });
+
+        // 视频模态框关闭
+        document.getElementById('closeVideoModal').addEventListener('click', closeVideoModal);
+        domRefs.videoModal.addEventListener('click', (e) => {
+            if (e.target === dom极客Refs.videoModal) closeVideoModal();
+        });
+
+        // 用户菜单
         initUserMenu();
-    });
-
-    // 初始化检测动画
-    function initDetectionAnimation() {
-        const circles = document.querySelectorAll('.circle');
-        circles.forEach((circle, index) => {
-            circle.style.animationDelay = `${index * 0.5}s`;
-        });
     }
 
-    // 初始化用户菜单
-    function initUserMenu() {
-        const menuButton = document.getElementById('user-menu-button');
-        const userMenu = document.getElementById('user-menu');
-        const menuContainer = document.querySelector('.user-menu-container');
-
-        // 菜单显示状态
-        let isMenuOpen = false;
-
-        // 点击按钮切换菜单
-        menuButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isMenuOpen = !isMenuOpen;
-            userMenu.classList.toggle('active', isMenuOpen);
-        });
-
-        // 点击菜单项
-        userMenu.addEventListener('click', (e) => {
-            // 阻止事件冒泡，避免触发文档点击事件
-            e.stopPropagation();
-        });
-
-        // 点击文档其他区域关闭菜单
-        document.addEventListener('click', (e) => {
-            if (isMenuOpen && !menuContainer.contains(e.target)) {
-                isMenuOpen = false;
-                userMenu.classList.remove('active');
-            }
-        });
-
-        // 鼠标悬停在菜单容器上时保持菜单打开
-        menuContainer.addEventListener('mouseenter', () => {
-            isMenuOpen = true;
-            userMenu.classList.add('active');
-        });
-
-        // 鼠标离开菜单容器时关闭菜单
-        menuContainer.addEventListener('mouseleave', () => {
-            isMenuOpen = false;
-            userMenu.classList.remove('active');
-        });
-    }
-
-    // 压力测试逻辑
-    const startTestBtn = document.getElementById('startTest');
-    const detectionProgress = document.getElementById('detectionProgress');
-    const detectionSection = document.getElementById('detectionSection');
-    const resultSection = document.getElementById('resultSection');
-    const resultValue = document.getElementById('resultValue');
-
-
-    // 压力调节逻辑
-    const pressureSlider = document.getElementById('pressureSlider');
-    const currentLevel = document.getElementById('currentLevel');
-    const methodBtns = document.querySelectorAll('.method-btn');
-
-    pressureSlider.addEventListener('input', () => {
-        currentLevel.textContent = pressureSlider.value;
-    });
-
-    // 预设的视频资源
-    const methodVideos = {
-        'breathing': {
-            url: 'https://example.com/breathing.mp4',
-            title: '呼吸调节指导视频'
-        },
-        'music': {
-            url: 'https://example.com/relaxing_music.mp3',
-            title: '舒缓放松音乐'
-        },
-        'meditation': {
-            url: 'https://example.com/meditation.mp4',
-            title: '冥想指导视频'
-        }
-    };
-
-    // 调节方法按钮
-    methodBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const method = btn.dataset.method;
-            const beforeLevel = parseInt(currentLevel.textContent);
-            const videoInfo = methodVideos[method];
-
-            // 模拟调节效果
-            const reduction = Math.floor(Math.random() * 3) + 1;
-            let newLevel = beforeLevel - reduction;
-            if (newLevel < 1) newLevel = 1;
-
-            // 更新显示
-            currentLevel.textContent = newLevel;
-            pressureSlider.value = newLevel;
-
-            // 显示通知
-            showNotification(`使用${getMethodName(method)}成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
-
-            // 保存调节记录（包含视频信息）
-            const data = {
-                before_level: beforeLevel,
-                after_level: newLevel,
-                method: method,
-                video_url: videoInfo.url,
-                video_title: videoInfo.title
-            };
-
-            // 发送数据到后端
-            fetch('/save_adjustment/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log('调节记录保存成功');
-                } else {
-                    console.error('保存调节记录失败:', result.error);
-                }
-            });
-        });
-    });
-
-    // 获取方法名称
-    function getMethodName(method) {
-        const methods = {
-            'breathing': '呼吸调节',
-            'music': '音乐疗法',
-            'meditation': '冥想指导'
-        };
-        return methods[method] || method;
-    }
-
-    // 显示通知
-    function showNotification(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-    // 爱好调查模态窗口处理
-    document.addEventListener('DOMContentLoaded', () => {
-        // 检查是否显示爱好调查 (模拟)
-        const showHobbySurvey = false;
-
-        if (showHobbySurvey) {
-            const modal = document.getElementById('hobbySurveyModal');
-            modal.style.display = 'block';
-
-            // 关闭按钮事件
-            const closeBtn = document.querySelector('.close');
-            closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            // 表单提交事件
-            const surveyForm = document.getElementById('hobbySurveyForm');
-            surveyForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert('兴趣爱好提交成功！');
-                modal.style.display = 'none';
-            });
-        }
-    });
-
-    // 添加全局点击关闭模态窗口的功能
-    window.addEventListener('click', (event) => {
-        const modal = document.getElementById('hobbySurveyModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-
-
-    // 视频播放功能
-    const videoModal = document.getElementById('videoModal');
-    const videoPlayer = document.getElementById('videoPlayer');
-    const videoSource = document.getElementById('videoSource');
-    const videoModalTitle = document.getElementById('videoModalTitle');
-    const closeVideoModal = document.getElementById('closeVideoModal');
-
-    // 播放视频按钮事件
-    document.querySelectorAll('.play-video-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const videoUrl = btn.dataset.videoUrl;
-            const videoTitle = btn.dataset.videoTitle;
-
-            // 设置视频源和标题
-            videoSource.src = videoUrl;
-            videoModalTitle.textContent = videoTitle;
-
-            // 加载并播放视频
-            videoPlayer.load();
-
-            // 显示模态框
-            videoModal.classList.remove('hidden');
-        });
-    });
-
-    // 关闭视频模态框
-    closeVideoModal.addEventListener('click', () => {
-        videoPlayer.pause();
-        videoModal.classList.add('hidden');
-    });
-
-    // 点击模态框背景关闭
-    videoModal.addEventListener('click', (e) => {
-        if (e.target === videoModal) {
-            videoPlayer.pause();
-            videoModal.classList.add('hidden');
-        }
-    });
-
-
-    //---------------------------
-    // 获取 CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-
-    // 文件上传处理
-    const matFileInput = document.getElementById('matFile');
-    const fileNameDisplay = document.getElementById('fileName');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileUploadSection = document.getElementById('fileUploadSection');
-
-    // 文件选择处理
-    matFileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            const file = e.target.files[0];
-            fileNameDisplay.textContent = file.name;
-            uploadBtn.disabled = false;
-        } else {
-            fileNameDisplay.textContent = '未选择文件';
-            uploadBtn.disabled = true;
-        }
-    });
-
-    // 开始测试按钮逻辑修改
-    startTestBtn.addEventListener('click', () => {
-        // 隐藏结果区域（如果可见）
-        resultSection.classList.add('hidden');
+    // ================== 核心功能函数 ==================
+    function handleStartTest() {
+        // 隐藏结果区域
+        domRefs.resultSection.classList.add('hidden');
 
         // 显示文件上传区域
-        fileUploadSection.classList.remove('hidden');
+        domRefs.fileUploadSection.classList.remove('hidden');
 
         // 更新按钮状态
-        startTestBtn.textContent = "取消测试";
-        startTestBtn.disabled = false;
-    });
+        domRefs.startTestBtn.textContent = "取消测试";
+    }
 
-    // 上传按钮逻辑
-    uploadBtn.addEventListener('click', () => {
-        const file = matFileInput.files[0];
+    function handleFileSelect(e) {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            domRefs.fileNameDisplay.textContent = file.name;
+            domRefs.uploadBtn.disabled = false;
+        } else {
+            domRefs.fileNameDisplay.textContent = '未选择文件';
+            domRefs.uploadBtn.disabled = true;
+        }
+    }
+
+    function handleFileUpload() {
+        const file = domRefs.matFileInput.files[0];
         if (!file) return;
 
         // 显示检测动画
-        detectionSection.classList.remove('hidden');
-        fileUploadSection.classList.add('hidden');
+        domRefs.detectionSection.classList.remove('hidden');
+        domRefs.fileUploadSection.classList.add('hidden');
 
         // 重置进度条
-        detectionProgress.style.width = '0%';
+        domRefs.detectionProgress.style.width = '0%';
 
         // 创建FormData对象
         const formData = new FormData();
@@ -1231,9 +984,9 @@
 
         // 显示上传进度
         const progressInterval = setInterval(() => {
-            const currentWidth = parseInt(detectionProgress.style.width) || 0;
+            const currentWidth = parseInt(domRefs.detectionProgress.style.width) || 0;
             if (currentWidth < 80) {
-                detectionProgress.style.width = `${currentWidth + 2}%`;
+                domRefs.detectionProgress.style.width = `${currentWidth + 2}%`;
             }
         }, 100);
 
@@ -1251,13 +1004,13 @@
 
             if (data.success) {
                 // 更新进度条到100%
-                detectionProgress.style.width = '100%';
+                domRefs.detectionProgress.style.width = '100%';
 
                 setTimeout(() => {
                     // 显示结果
                     const pressureLevel = data.pressure_level;
                     const predictionLabel = data.prediction_label;
-                    resultValue.textContent = pressureLevel;
+                    domRefs.resultValue.textContent = pressureLevel;
 
                     // 更新详细结果
                     document.getElementById('resultFileName').textContent = data.file_name;
@@ -1282,20 +1035,24 @@
                     }
 
                     // 更新UI
-                    startTestBtn.textContent = "开始测试";
-                    startTestBtn.disabled = false;
+                    domRefs.startTestBtn.textContent = "开始测试";
+                    domRefs.startTestBtn.disabled = false;
 
                     // 更新调节页面的当前等级
-                    pressureSlider.value = pressureLevel;
-                    currentLevel.textContent = pressureLevel;
+                    domRefs.pressureSlider.value = pressureLevel;
+                    domRefs.currentLevel.textContent = pressureLevel;
 
                     // 隐藏检测动画，显示结果
-                    detectionSection.classList.add('hidden');
-                    resultSection.classList.remove('hidden');
+                    domRefs.detectionSection.classList.add('hidden');
+                    domRefs.resultSection.classList.remove('hidden');
 
                     // 保存测试结果
                     saveTestResult(pressureLevel);
+
+                    // 重新加载推荐内容
+                    loadRecommendations();
                 }, 500);
+
             } else {
                 alert('文件分析失败: ' + data.error);
                 resetTestState();
@@ -1307,25 +1064,29 @@
             alert('文件上传失败，请重试');
             resetTestState();
         });
-    });
-
-    // 根据压力等级获取标签
-    function getPressureLabel(level) {
-        if (level <= 3) return '低压力';
-        if (level <= 6) return '中压力';
-        if (level <= 8) return '高压力';
-        return '极高压力';
     }
 
-    // 根据压力等级获取CSS类
-    function getPressureClass(level) {
-        if (level <= 3) return 'result-good';
-        if (level <= 6) return 'result-medium';
-        if (level <= 8) return 'result-bad';
-        return 'result-bad'; // 极高压力也使用红色
+    function handleMethodSelection(e) {
+        const method = e.target.dataset.method;
+        const beforeLevel = parseInt(domRefs.currentLevel.textContent);
+
+        // 模拟调节效果
+        const reduction = Math.floor(Math.random() * 2) + 1;
+        let newLevel = beforeLevel - reduction;
+        if (newLevel < 1) newLevel = 1;
+
+        // 更新显示
+        domRefs.currentLevel.textContent = newLevel;
+        domRefs.pressureSlider.value = newLevel;
+
+        // 显示通知
+        showNotification(`使用${getMethodName(method)}成功！压力等级从 ${beforeLevel} 降低到 ${newLevel}`);
+
+        // 保存调节记录
+        saveAdjustmentRecord(beforeLevel, newLevel, method);
     }
 
-    // 保存测试结果函数
+    // ================== 后端API交互函数 ==================
     function saveTestResult(pressureLevel) {
         const data = {
             pressure_level: pressureLevel,
@@ -1344,23 +1105,246 @@
         .then(result => {
             if (result.success) {
                 console.log('测试结果保存成功');
+                // 重新加载测试记录
+                loadTestRecords();
             } else {
                 console.error('保存测试结果失败:', result.error);
             }
         });
     }
 
-    // 重置测试状态
-    function resetTestState() {
-        startTestBtn.textContent = "开始测试";
-        startTestBtn.disabled = false;
-        detectionSection.classList.add('hidden');
-        fileUploadSection.classList.add('hidden');
-        matFileInput.value = '';
-        fileNameDisplay.textContent = '未选择文件';
-        uploadBtn.disabled = true;
-    }
-</script>
+    function saveAdjustmentRecord(beforeLevel, afterLevel, method) {
+        const data = {
+            before_level: beforeLevel,
+            after_level: afterLevel,
+            method: method
+        };
 
+        fetch('/save_adjustment/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('调节记录保存成功');
+            } else {
+                console.error('保存调节记录失败:', result.error);
+            }
+        });
+    }
+
+    function loadTestRecords() {
+        // 从后端获取测试记录
+        fetch('/get_test_records/') // 需要添加这个URL到urls.py
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.records) {
+                domRefs.testRecords.innerHTML = '';
+
+                data.records.forEach(record => {
+                    const recordElement = `
+                        <div class="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${record.date}</div>
+                                <div class="text-sm text-gray-500">${record.duration}</div>
+                            </div>
+                            <span class="result-badge ${getPressureClass(record.level)}">${record.level}</span>
+                        </div>
+                    `;
+                    domRefs.testRecords.innerHTML += recordElement;
+                });
+            }
+        });
+    }
+
+    function loadRecommendations() {
+        // 从后端获取推荐内容
+        fetch('/get_recommendations/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.recommended_videos) {
+                domRefs.recommendationContainer.innerHTML = '';
+
+                data.recommended_videos.forEach(video => {
+                    const videoCard = `
+                        <div class="recommendation-card">
+                            <div class="flex items-start">
+                                <div class="recommendation-icon">
+                                    <i class="fa fa-play-circle"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800 mb-1">${video.name}</h4>
+                                    <p class="text-sm text-gray-600">${video.description}</p>
+                                    <div class="mt-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span>时长</span>
+                                            <span>${video.duration_minutes}分钟</span>
+                                        </div>
+                                    </div>
+                                    <button class="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition play-video-btn"
+                                            data-video-url="${video.video_url}"
+                                            data-video-title="${video.name}">
+                                        <i class="fa fa-play mr-1"></i>播放视频
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    domRefs.recommendationContainer.innerHTML += videoCard;
+                });
+
+                // 绑定新创建的播放按钮
+                document.querySelectorAll('.play-video-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const videoUrl = btn.dataset.videoUrl;
+                        const videoTitle = btn.dataset.videoTitle;
+                        playVideo(videoUrl, videoTitle);
+                    });
+                });
+            }
+        });
+    }
+
+    // ================== 工具函数 ==================
+    function getPressureLabel(level) {
+        if (level <= 3) return '低压力';
+        if (level <= 6) return '中压力';
+        if (level <= 8) return '高压力';
+        return '极高压力';
+    }
+
+    function getPressureClass(level) {
+        if (level <= 3) return 'result-good';
+        if (level <= 6) return 'result-medium';
+        if (level <= 8) return 'result-bad';
+        return 'result-bad';
+    }
+
+    function getMethodName(method) {
+        const methods = {
+            'breathing': '呼吸调节',
+            'music': '音乐疗法',
+            'meditation': '冥想指导'
+        };
+        return methods[method] || method;
+    }
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    function playVideo(url, title) {
+        domRefs.videoSource.src = url;
+        domRefs.videoModalTitle.textContent = title;
+        domRefs.videoPlayer.load();
+        domRefs.videoModal.classList.remove('hidden');
+    }
+
+    function closeVideoModal() {
+        domRefs.videoPlayer.pause();
+        domRefs.videoModal.classList.add('hidden');
+    }
+
+    function initUserMenu() {
+        const menuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+        const menuContainer = document.querySelector('.user-menu-container');
+
+        let isMenuOpen = false;
+
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMenuOpen = !isMenuOpen;
+            userMenu.classList.toggle('active', isMenuOpen);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (isMenuOpen && !menuContainer.contains(e.target)) {
+                isMenuOpen = false;
+                userMenu.classList.remove('active');
+            }
+        });
+
+        menuContainer.addEventListener('mouseenter', () => {
+            isMenuOpen = true;
+            userMenu.classList.add('active');
+        });
+
+        menuContainer.addEventListener('mouseleave', () => {
+            isMenuOpen = false;
+            userMenu.classList.remove('active');
+        });
+    }
+
+    function resetTestState() {
+        domRefs.startTestBtn.textContent = "开始测试";
+        domRefs.startTestBtn.disabled = false;
+        domRefs.detectionSection.classList.add('hidden');
+        domRefs.fileUploadSection.classList.add('hidden');
+        domRefs.matFileInput.value = '';
+        domRefs.fileNameDisplay.textContent = '未选择文件';
+        domRefs.uploadBtn.disabled = true;
+    }
+
+    // 获取 CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+    // 反馈提交处理
+    document.getElementById('submitFeedback').addEventListener('click', () => {
+      const preStress = parseInt(document.getElementById('preStressSlider').value);
+      const postStress = parseInt(document.getElementById('postStressSlider').value);
+      const selectedVideoId = currentVideoId; // 当前播放的视频ID
+
+      fetch('/submit_feedback/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          pre_stress: preStress,
+          post_stress: postStress,
+          selected_video_id: selectedVideoId
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.success) {
+          alert('感谢您的反馈！');
+          closeFeedbackModal();
+        }
+      });
+    });
+
+
+    // ================== 启动应用 ==================
+    document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>

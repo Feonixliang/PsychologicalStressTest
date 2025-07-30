@@ -1,20 +1,36 @@
 # views.py
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
+import json
+import logging
+import random
+
+import numpy as np
+import requests
+from django.contrib import messages
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from .models import PressureTest, PressureAdjustment, UserProfile, UserHobby
-from django.contrib.auth import login, authenticate
-from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-import logging
-from django.views.decorators.csrf import csrf_exempt
-import json
+
+from app1.EEGStressMAB import EEGStressMAB
 from .forms import UserProfileForm
+from .models import PressureAdjustment, PressureTest, UserProfile, UserHobby, VideoRecommendation
 
 
 logger = logging.getLogger(__name__)
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """处理numpy类型的JSON编码器"""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 @login_required
 def dashboard(request):
@@ -153,16 +169,6 @@ def edit_profile(request):
     })
 
 
-import os
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from django.http import JsonResponse
-import scipy.io
-import numpy as np
-from scipy.signal import welch
-from .models import PressureTest
-
-
 # 压力分析函数 (示例实现)
 def analyze_pressure(mat_data):
     """
@@ -190,10 +196,6 @@ def analyze_pressure(mat_data):
         raise ValueError(f"数据分析错误: {str(e)}")
 
 
-import requests
-
-
-# 修改后的 upload_mat 函数
 @csrf_exempt
 @login_required
 def upload_mat(request):
@@ -202,19 +204,19 @@ def upload_mat(request):
         try:
             # 获取上传的文件
             mat_file = request.FILES['mat_file']
-
-            # 设置API接口地址
             API_URL = "http://localhost:8000/predict"
-
-            # 准备文件数据
             files = {'file': (mat_file.name, mat_file, 'application/octet-stream')}
+
+            logger.info(f"开始处理文件上传: {mat_file.name}")
 
             try:
                 # 发送请求到API接口
                 response = requests.post(API_URL, files=files)
+                logger.info(f"API响应状态码: {response.status_code}")
 
                 # 检查响应状态
                 if response.status_code != 200:
+                    logger.error(f"API服务错误: 状态码 {response.status_code}")
                     return JsonResponse({
                         'success': False,
                         'error': f'API服务错误: 状态码 {response.status_code}'
@@ -222,26 +224,60 @@ def upload_mat(request):
 
                 # 解析API返回的JSON数据
                 api_data = response.json()
+                logger.info(f"API返回原始数据: {json.dumps(api_data, indent=2, ensure_ascii=False)}")
 
                 # 提取所需数据
-                prediction = api_data.get('prediction', '中压力')
+                prediction = api_data.get('prediction', '')
                 confidence = api_data.get('confidence', 0.0)
                 probabilities = api_data.get('probabilities', [])
                 class_names = api_data.get('class_names', [])
 
-                # 创建概率字典
-                probabilities_dict = {}
-                if probabilities and class_names and len(probabilities) == len(class_names):
-                    probabilities_dict = {name: prob for name, prob in zip(class_names, probabilities)}
+                logger.info(f"预测结果: {prediction}, 置信度: {confidence}")
 
-                # 映射压力等级数值（1-10）
+
+                # 回退到字符串映射
+                logger.warning("使用回退的压力等级映射")
                 pressure_level_map = {
-                    "低压力": 3,
-                    "中压力": 6,
-                    "高压力": 8,
-                    "极高压力": 10
+                    "低压力": 1,
+                    "中压力": 2,
+                    "高压力": 3,
+                    "极高压力": 4
                 }
-                pressure_level = pressure_level_map.get(prediction, 5)
+                pressure_level = pressure_level_map.get(prediction, 3)  # 默认中等压力
+
+                logger.info(f"映射后的压力等级: {pressure_level}")
+
+
+                # 验证压力等级范围 (1-4级)
+                if pressure_level < 1:
+                    pressure_level = 1
+                elif pressure_level > 4:
+                    pressure_level = 4
+
+                logger.info(f"调整后压力等级: {pressure_level}")
+
+                # 获取压力等级后调用推荐系统
+                recommender = EEGStressMAB(request.user)
+                recommended_videos = recommender.recommend_videos(pressure_level)
+
+                logger.info(f"推荐视频原始数据: {json.dumps(recommended_videos, indent=2, ensure_ascii=False)}")
+
+                logger.info(f"推荐视频数据: {json.dumps(recommended_videos, indent=2, ensure_ascii=False)}")
+
+                # 保存推荐记录 - 直接存储Python对象
+                try:
+                    VideoRecommendation.objects.create(
+                        user=request.user,
+                        stress_level=pressure_level,
+                        recommended_videos=recommended_videos
+                    )
+                    logger.info("推荐记录保存成功")
+                except Exception as e:
+                    logger.error(f"保存推荐记录失败: {str(e)}")
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'保存推荐记录失败: {str(e)}'
+                    })
 
                 # 返回分析结果
                 return JsonResponse({
@@ -249,23 +285,28 @@ def upload_mat(request):
                     'file_name': mat_file.name,
                     'pressure_level': pressure_level,
                     'confidence': confidence,
-                    'probabilities': probabilities_dict,
+                    'probabilities': {name: float(prob) for name, prob in
+                                      zip(class_names, probabilities)} if probabilities else {},
                     'prediction_label': prediction,
-                    'message': '分析成功'
+                    'message': '分析成功',
+                    'recommended_videos': recommended_videos,
                 })
 
             except requests.exceptions.RequestException as e:
+                logger.error(f"API连接失败: {str(e)}")
                 return JsonResponse({
                     'success': False,
                     'error': f'API连接失败: {str(e)}'
                 })
-            except ValueError as e:
+            except (ValueError, json.JSONDecodeError, KeyError) as e:
+                logger.error(f"API返回数据解析错误: {str(e)}")
                 return JsonResponse({
                     'success': False,
                     'error': f'API返回数据解析错误: {str(e)}'
                 })
 
         except Exception as e:
+            logger.exception("处理上传时发生异常")
             return JsonResponse({
                 'success': False,
                 'error': str(e)
@@ -275,3 +316,173 @@ def upload_mat(request):
         'success': False,
         'error': '无效的请求或未上传文件'
     })
+
+
+@login_required
+def get_recommendations(request):
+    """获取最新推荐视频"""
+    latest_rec = VideoRecommendation.objects.filter(
+        user=request.user
+    ).order_by('-recommend_time').first()
+
+    if latest_rec:
+        # 直接返回JSONField值，不需要json.loads()
+        return JsonResponse({
+            'success': True,
+            'recommended_videos': latest_rec.recommended_videos
+        })
+    return JsonResponse({'success': False, 'message': 'No recommendations'})
+
+
+@login_required
+def get_test_records(request):
+    """获取用户测试记录"""
+    records = PressureTest.objects.filter(
+        user=request.user
+    ).order_by('-test_time')[:5]  # 获取最近5条记录
+
+    records_data = []
+    for record in records:
+        records_data.append({
+            'date': record.test_time.strftime("%Y-%m-%d %H:%M"),
+            'level': record.pressure_level,
+            'duration': f"{record.duration}秒"
+        })
+
+    return JsonResponse({
+        'success': True,
+        'records': records_data
+    })
+
+
+# 添加反馈处理视图
+@csrf_exempt
+@login_required
+def submit_feedback(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            pre_stress = data['pre_stress']
+            post_stress = data['post_stress']
+            selected_video_id = data['selected_video_id']
+
+            # 更新推荐模型
+            recommender = EEGStressMAB(request.user)  # 修复：传递user对象而不是username
+            recommender.update_model(pre_stress, post_stress, selected_video_id)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': '无效请求方法'})
+
+
+@login_required
+def test_recommendation_system(request):
+    """测试推荐系统功能 - 不需要真实EEG数据"""
+    try:
+        # 模拟不同压力等级的测试
+        test_results = []
+        
+        for stress_level in range(1, 5):
+            try:
+                # 初始化推荐系统
+                recommender = EEGStressMAB(request.user)
+                
+                # 获取推荐视频
+                videos = recommender.recommend_videos(stress_level)
+                
+                test_results.append({
+                    'stress_level': stress_level,
+                    'success': True,
+                    'video_count': len(videos),
+                    'videos': videos
+                })
+                
+                logger.info(f"压力等级 {stress_level}: 成功推荐 {len(videos)} 个视频")
+                
+            except Exception as e:
+                test_results.append({
+                    'stress_level': stress_level,
+                    'success': False,
+                    'error': str(e)
+                })
+                logger.error(f"压力等级 {stress_level} 测试失败: {e}")
+        
+        # 测试反馈机制
+        feedback_test = {'success': False}
+        try:
+            recommender = EEGStressMAB(request.user)
+            recommender.update_model(pre_stress=4, post_stress=2, selected_video_id=0)
+            feedback_test = {'success': True, 'message': '反馈机制正常'}
+            logger.info("反馈机制测试成功")
+        except Exception as e:
+            feedback_test = {'success': False, 'error': str(e)}
+            logger.error(f"反馈机制测试失败: {e}")
+        
+        return JsonResponse({
+            'success': True,
+            'test_results': test_results,
+            'feedback_test': feedback_test,
+            'message': '推荐系统测试完成'
+        }, encoder=NumpyEncoder)
+        
+    except Exception as e:
+        logger.exception("推荐系统测试过程中发生异常")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
+@login_required 
+def simulate_pressure_test(request):
+    """模拟压力测试 - 直接指定压力等级进行推荐"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            pressure_level = data.get('pressure_level', 3)
+            
+            # 验证压力等级
+            if pressure_level < 1 or pressure_level > 4:
+                pressure_level = 3
+            
+            logger.info(f"模拟压力测试 - 压力等级: {pressure_level}")
+            
+            # 调用推荐系统
+            recommender = EEGStressMAB(request.user)
+            recommended_videos = recommender.recommend_videos(pressure_level)
+            
+            # 保存模拟测试记录
+            PressureTest.objects.create(
+                user=request.user,
+                pressure_level=pressure_level,
+                duration=0  # 模拟测试无持续时间
+            )
+            
+            # 保存推荐记录
+            VideoRecommendation.objects.create(
+                user=request.user,
+                stress_level=pressure_level,
+                recommended_videos=recommended_videos
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'pressure_level': pressure_level,
+                'recommended_videos': recommended_videos,
+                'message': f'模拟测试成功 - 压力等级{pressure_level}'
+            }, encoder=NumpyEncoder)
+            
+        except Exception as e:
+            logger.exception("模拟压力测试失败")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+    
+    return JsonResponse({'success': False, 'error': '请使用POST方法'})
+
+
+def test_page(request):
+    """测试页面"""
+    return render(request, 'test_recommendation.html')

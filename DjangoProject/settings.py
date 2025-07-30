@@ -1,6 +1,10 @@
 """
 Django settings for DjangoProject project.
 """
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 import os
 from pathlib import Path
 
@@ -19,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app1'
+    'app1',
 ]
 
 MIDDLEWARE = [
@@ -57,13 +61,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'DjangoProject.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'PsycStr',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '3306'
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "PsycStr",
+        "USER": "root",
+        "PASSWORD": "123456",
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "use_unicode": True,
+        },
     }
 }
 
@@ -81,6 +89,41 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'app1': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
+# 压力推荐系统配置
+STRESS_RECOMMENDER_CONFIG = {
+    'API_URL': 'http://localhost:8000/predict',  # 压力分析API地址
+    'RECOMMENDATION_SIZE': 3,
+}
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
